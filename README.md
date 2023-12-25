@@ -1,5 +1,5 @@
-# Gelato :icecream:
+# :icecream: Gelato
 
 ## Introduction
 
-This is Gelato (General-purpose Lightweight GPU in RISC-V Architecture with T extension), a SIMT GPGPU supporting RV64im and custom extensions (for parallel computing) written in SystemVerilog. 
+This is Gelato (**Ge**neral-purpose **L**ightweight GPU supporting RISC-V IS**A** with SIM**T** extensi**o**n), a GPGPU supporting RV32IMA and custom extensions (for parallel computing). It is a part of the [Dolce Project](https://github.com/dolce-project/dolce).
