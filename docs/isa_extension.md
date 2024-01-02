@@ -8,12 +8,12 @@ We add following instructions to the RISC-V ISA to handle divergence and synchro
 1. `bra rs1, rs2, imm`
   - B-type instruction.
   - splits the threads according to the value of `rs1` (==/!= 0) into two groups, one starts at `pc + imm`, the other starts at `pc + 4`. Finally, they reconverge at `pc + rs2`.
-2. `select rd, rs1, rs2, rs3` 
+2. `sel rd, rs1, rs2, rs3` 
   - R-type instruction.
   - selects the value of `rs2` or `rs3` according to the value of `rs1`, and stores the result back in it.
 3. `bar imm`
   - I-type instruction.
-  - Store this barrier at the `imm1`-th barrier slot of the block, and wait until `imm2` threads in the warp/block have reached this barrier.
+  - stores this barrier at the `imm1`-th barrier slot of the block, and wait until `imm2` threads in the warp/block have reached this barrier. Here `imm1` and `imm2` are encoded in `imm` as its lower and upper bits respectively.
 
 We also add following instructions to accelerate matrix computations.
 1. `mload rd, rs1, imm`
