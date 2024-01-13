@@ -7,7 +7,7 @@
 `include "gelato_types.svh"
 
 
-interface gelato_ifetch_ibuffer_if;
+interface gelato_idecode_ibuffer_if;
   import gelato_types::*;
 
   // Basic Information
@@ -18,9 +18,9 @@ interface gelato_ifetch_ibuffer_if;
   // Decode instruction of the selected instruction
   gelato_inst_t inst;
 
-  // Instruction Decode Unit
+  // I-Decode -> I-Buffer
   modport master(output pc, output warp_num, output thread_mask, output inst);
 
-  // Instruction Buffer
+  // I-Buffer -> I-Decode
   modport slave(input pc, input warp_num, input thread_mask, input inst);
 endinterface

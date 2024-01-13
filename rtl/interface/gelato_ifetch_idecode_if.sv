@@ -6,20 +6,20 @@
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
-interface gelato_fetchskd_ifetch_if;
+
+interface gelato_ifetch_idecode_if;
   import gelato_types::*;
 
-  // Information of the selected program counter
+  // Basic Information
   logic valid;
   addr_t pc;
   warp_num_t warp_num;
   split_table_num_t split_table_num;
+  data_t inst;
 
-  // Fetch Scheduler -> I-Fetch
-  modport master(output valid, output pc, output warp_num, output split_table_num);
+  // I-Fetch -> I-Decode
+  modport master(output valid, output pc, output warp_num, output split_table_num, output inst);
 
-  // I-Fetch -> Fetch Scheduler
-  modport slave(input valid, input pc, input warp_num, input split_table_num);
-
+  // I-Decode -> I-Fetch
+  modport slave(input valid, input pc, input warp_num, input split_table_num, input inst);
 endinterface
-

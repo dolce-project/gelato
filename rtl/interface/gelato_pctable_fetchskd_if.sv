@@ -4,9 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 `include "gelato_macros.svh"
-`include "gelato_types.sv"
+`include "gelato_types.svh"
 
-interface gelato_pctable_ifetch_if;
+interface gelato_pctable_fetchskd_if;
   import gelato_types::*;
 
   logic valid[`WARP_NUM];
