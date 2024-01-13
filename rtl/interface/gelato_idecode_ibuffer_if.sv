@@ -11,16 +11,17 @@ interface gelato_idecode_ibuffer_if;
   import gelato_types::*;
 
   // Basic Information
-  logic [`ADDR_INDEX] pc;
-  logic [`WARP_NUM_INDEX] warp_num;
-  logic [`THREAD_INDEX] thread_mask;
+  logic valid;
+  addr_t pc;
+  warp_num_t warp_num;
+  thread_mask_t thread_mask;
 
   // Decode instruction of the selected instruction
-  gelato_inst_t inst;
+  inst_t inst;
 
   // I-Decode -> I-Buffer
-  modport master(output pc, output warp_num, output thread_mask, output inst);
+  modport master(output valid, output pc, output warp_num, output thread_mask, output inst);
 
   // I-Buffer -> I-Decode
-  modport slave(input pc, input warp_num, input thread_mask, input inst);
+  modport slave(input valid, input pc, input warp_num, input thread_mask, input inst);
 endinterface

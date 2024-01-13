@@ -26,6 +26,8 @@ package gelato_types;
 
   typedef logic [`THREAD_NUM_INDEX] thread_num_t;
 
+  typedef logic [`THREAD_INDEX] thread_mask_t;
+
   typedef logic [`SPLIT_TABLE_NUM_INDEX] split_table_num_t;
 
   typedef struct packed {
@@ -37,7 +39,7 @@ package gelato_types;
     logic [`NUM_INDEX] imm;
     logic [`FUNCT3_INDEX] funct3;
     logic [`FUNCT7_INDEX] funct7;
-  } gelato_inst_t;
+  } inst_t;
 endpackage
 
 `endif
