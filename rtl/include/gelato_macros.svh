@@ -60,6 +60,25 @@
 `define OPCODE_WIDTH 7
 `define OPCODE_INDEX 6:0
 
+`define OPCODE_LUI    7'b0110111
+`define OPCODE_AUIPC  7'b0010111
+`define OPCODE_JAL    7'b1101111
+`define OPCODE_JALR   7'b1100111
+`define OPCODE_BRANCH 7'b1100011
+`define OPCODE_LOAD   7'b0000011
+`define OPCODE_STORE  7'b0100011
+`define OPCODE_ARITHI 7'b0010011
+`define OPCODE_ARITH  7'b0110011
+
+// Branch instructions with divergence
+`define FUNCT3_SEQ 3'b010
+`define FUNCT3_SNE 3'b011
+
+// Special operations
+`define OPCODE_VARITH 7'b1010111
+`define OPCODE_VLOAD  7'b0000111
+`define OPCODE_VSTORE 7'b0100111
+
 `define REG_NUM_WIDTH 5
 `define REG_NUM_INDEX 4:0
 

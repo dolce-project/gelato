@@ -9,11 +9,13 @@
 interface gelato_idecode_split_if;
   import gelato_types::*;
 
-  // Get thread mask (by combinational logic)
+  // Get thread mask (returned by combinational logic)
   warp_num_t warp_num;
   split_table_num_t split_table_num;
   thread_mask_t thread_mask;
 
   // Basic Information
   logic valid;
-endinterface;
+  logic stall;
+  addr_t updated_pc;
+endinterface

@@ -10,7 +10,8 @@ module gelato_split_table (
   input logic rst_n,
   input logic rdy,
 
-  gelato_pctable_fetchskd_if.master pc_table
+  gelato_pctable_fetchskd_if.master pc_table,
+  gelato_idecode_split_if.slave split_data
 );
 
 endmodule
