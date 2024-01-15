@@ -6,7 +6,7 @@
 // This file contains the implementation of the split table of the Gelato GPU. Split table is the key module in a SIMT execution model.
 
 `include "gelato_macros.svh"
-`include "gelato_types.sv"
+`include "gelato_types.svh"
 
 module gelato_split_table (
   input logic clk,
@@ -21,10 +21,12 @@ module gelato_split_table (
   gelato_split_table_select_pc_if select[`WARP_NUM];
   gelato_split_table_update_pc_if update[`WARP_NUM];
 
+  assign split_data.thread_mask = update[split_data.warp_num].thread_mask;
+
   generate;
     for (genvar i = 0; i < `WARP_NUM; i++) begin: gen_split_table
       // Select update data
-      assign update[i].valid = split_data.valid[i];
+      assign update[i].valid = split_data.valid & (split_data.warp_num == i);
       assign update[i].stall = split_data.stall;
       assign update[i].pc = split_data.updated_pc;
       assign update[i].split_table_num = split_data.split_table_num;
@@ -45,6 +47,4 @@ module gelato_split_table (
       );
     end
   endgenerate
-
-
 endmodule

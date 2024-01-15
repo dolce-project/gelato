@@ -19,16 +19,20 @@ module gelato_inst_decode (
 );
   import gelato_types::*;
 
-  assign inst_decoded_data.thread_mask = split_data.thread_mask;
+  typedef enum {
+    IDLE,
+    UPDATE
+  } status_t;
 
-  inst_t inst;  // Decoded instruction
+  inst_t   inst;  // Decoded instruction
+  status_t status;
 
   always_comb begin  // Decode instruction by combinational logic
     inst.opcode = inst_raw_data.inst[31:25];
     case (inst.opcode)
       `OPCODE_LUI, `OPCODE_AUIPC: begin
         inst.rd  = inst_raw_data.inst[11:7];
-        inst.imm = inst_raw_data.inst[31:12];
+        inst.imm = {inst_raw_data.inst[31:12], 12'b0};
       end
       `OPCODE_JAL: begin
         inst.rd = inst_raw_data.inst[11:7];
@@ -86,30 +90,48 @@ module gelato_inst_decode (
 
   always_ff @(posedge clk, negedge rst_n) begin
     if (!rst_n) begin
-      inst_decoded_data.valid <= 1'b0;
-      inst_decoded_data.inst  <= 0;
-    end else if (rdy && inst_raw_data.valid) begin
-      // Deliver the decoded instruction to the I-Buffer
-      inst_decoded_data.valid <= 1;
-      inst_decoded_data.pc <= inst_raw_data.pc;
-      inst_decoded_data.warp_num <= inst_raw_data.warp_num;
-      inst_decoded_data.thread_mask <= split_data.thread_mask;
-      inst_decoded_data.inst <= inst;
+      status <= IDLE;
+      inst_decoded_data.valid <= 0;
+      inst_decoded_data.inst <= 0;
+    end else if (rdy) begin
+      case (status)
+        IDLE: begin
+          if (inst_raw_data.valid) begin
+            split_data.warp_num <= inst_raw_data.warp_num;
+            split_data.split_table_num <= inst_raw_data.split_table_num;
+            status <= UPDATE;
+          end
+          split_data.valid <= 0;
+          inst_decoded_data.valid <= 0;
+        end
+        UPDATE: begin
+          // Deliver the decoded instruction to the I-Buffer
+          inst_decoded_data.pc <= inst_raw_data.pc;
+          inst_decoded_data.warp_num <= inst_raw_data.warp_num;
+          inst_decoded_data.thread_mask <= split_data.thread_mask;
+          inst_decoded_data.inst <= inst;
 
-      // Update the split table
-      split_data.valid <= 1;
-      split_data.warp_num <= inst_raw_data.warp_num;
-      split_data.split_table <= inst_raw_data.split_table_num;
+          // Update the split table
+          split_data.valid <= 1;
+          if (inst.opcode == `OPCODE_AUIPC || inst.opcode == `OPCODE_BRANCH) begin
+            split_data.stall <= 1;
+          end else if (inst.opcode == `OPCODE_JAL || inst.opcode == `OPCODE_JALR) begin
+            split_data.stall <= 0;
+            split_data.updated_pc <= inst_raw_data.pc + inst.imm;
+          end else begin
+            split_data.stall <= 0;
+            split_data.updated_pc <= inst_raw_data.pc + 4;
+          end
 
-      if (inst.opcode == `OPCODE_AUIPC || inst.opcode == `OPCODE_BRANCH) begin
-        split_data.stall <= 1;
-      end else if (inst.opcode == `OPCODE_JAL || inst.opcode == `OPCODE_JALR) begin
-        split_data.stall <= 0;
-        split_data.updated_pc <= inst_raw_data.pc + inst.imm;
-      end else begin
-        split_data.stall <= 0;
-        split_data.updated_pc <= inst_raw_data.pc + 4;
-      end
+          // Update status
+          status <= IDLE;
+        end
+        default: begin
+          $fatal(0, "gelato_inst_decode: Invalid status");
+        end
+      endcase
+
+
     end
   end
 endmodule

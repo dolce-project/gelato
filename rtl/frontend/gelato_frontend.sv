@@ -24,6 +24,19 @@ module gelato_frontend (
     .inst_raw_data(inst_raw_data)
   );
 
+  gelato_idecode_split_if split_data;
+  gelato_idecode_ibuffer_if inst_decoded_data;
+
+  gelato_inst_decode inst_decode_unit (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+
+    .inst_raw_data(inst_raw_data),
+    .split_data(split_data),
+    .inst_decoded_data(inst_decoded_data)
+  );
+
   gelato_inst_cache inst_cache (
     .clk(clk),
     .rst_n(rst_n),
@@ -48,6 +61,7 @@ module gelato_frontend (
     .rst_n(rst_n),
     .rdy(rdy),
 
-    .pc_table(pc_table)
+    .pc_table(pc_table),
+    .split_data(split_data)
   );
 endmodule

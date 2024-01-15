@@ -14,7 +14,7 @@ module gelato_warp_split_table (
   input logic rdy,
 
   gelato_split_table_select_pc_if.master select,
-  gelato_split_table_update_pc_if.master update
+  gelato_split_table_update_pc_if.slave update
 );
   import gelato_types::*;
 
@@ -23,8 +23,10 @@ module gelato_warp_split_table (
   split_table_num_t next_table_num;
   split_table_num_t last_table_num;
 
+  assign update.thread_mask = split_table[update.split_table_num].thread_mask;
+
   always_comb begin
-    for (split_table_num_t i = 0; i != `SPLIT_TABLE_NUM; i++) begin
+    for (split_table_num_t i = 0; i != `SPLIT_TABLE_MAX_NUM; i++) begin
       split_table_num_t j = last_table_num + i;
       if (split_table[j].valid) begin
         next_table_num = j;
@@ -41,11 +43,11 @@ module gelato_warp_split_table (
     end else if (rdy && update.valid) begin
       // Update the split table
       split_table[update.split_table_num].active <= !update.stall;
-      split_table[update.split_table_num].pc <= update.pc;
+      split_table[update.split_table_num].current_pc <= update.pc;
 
       // Select the next entry
       select.split_table_num <= next_table_num;
-      select.pc <= split_table[next_table_num].pc;
+      select.pc <= split_table[next_table_num].current_pc;
       select.valid <= split_table[next_table_num].valid & split_table[next_table_num].active;
       split_table[next_table_num].active <= 0;
       last_table_num <= next_table_num;

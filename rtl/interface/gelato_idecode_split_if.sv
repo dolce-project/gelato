@@ -18,4 +18,24 @@ interface gelato_idecode_split_if;
   logic valid;
   logic stall;
   addr_t updated_pc;
+
+  // I-Decode -> Split Table
+  modport master(
+    output warp_num,
+    output split_table_num,
+    input thread_mask,
+    output valid,
+    output stall,
+    output updated_pc
+  );
+
+  // Split Table -> I-Decode
+  modport slave(
+    input warp_num,
+    input split_table_num,
+    output thread_mask,
+    input valid,
+    input stall,
+    input updated_pc
+  );
 endinterface

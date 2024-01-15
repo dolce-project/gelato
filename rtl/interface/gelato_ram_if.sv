@@ -5,7 +5,7 @@
 
 `include "gelato_types.svh"
 
-interface gelato_mem_if;
+interface gelato_ram_if;
   import gelato_types::*;
 
   // Core -> Memory
