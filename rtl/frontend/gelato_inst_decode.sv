@@ -82,6 +82,8 @@ module gelato_inst_decode (
         inst.rs1 = inst_raw_data.inst[19:15];
         inst.rs2 = inst_raw_data.inst[24:20];
       end
+      `OPCODE_NOOP: begin
+      end
       default: begin
         $fatal(0, "gelato_inst_decode: Invalid opcode");
       end
@@ -130,8 +132,6 @@ module gelato_inst_decode (
           $fatal(0, "gelato_inst_decode: Invalid status");
         end
       endcase
-
-
     end
   end
 endmodule

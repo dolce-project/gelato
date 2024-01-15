@@ -71,6 +71,7 @@
 `define OPCODE_STORE  7'b0100011
 `define OPCODE_ARITHI 7'b0010011
 `define OPCODE_ARITH  7'b0110011
+`define OPCODE_NOOP   7'b0000000
 
 // Branch instructions with divergence
 `define FUNCT3_SEQ 3'b010

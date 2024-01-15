@@ -21,8 +21,6 @@ module gelato_split_table (
   gelato_split_table_select_pc_if select[`WARP_NUM];
   gelato_split_table_update_pc_if update[`WARP_NUM];
 
-  assign split_data.thread_mask = update[split_data.warp_num].thread_mask;
-
   generate;
     for (genvar i = 0; i < `WARP_NUM; i++) begin: gen_split_table
       // Select update data
@@ -45,6 +43,12 @@ module gelato_split_table (
         .select(select[i]),
         .update(update[i])
       );
+
+      always_comb begin
+        if (split_data.warp_num == i) begin
+          split_data.thread_mask = update[i].thread_mask;
+        end
+      end
     end
   endgenerate
 endmodule

@@ -26,11 +26,13 @@ module gelato_fetch_scheduler (
 
   // Generate new selected warp number
   always_comb begin
-    for (warp_num_t i = 0; i != `WARP_MAX_NUM; i++) begin
-      if (pc_table.valid[last_warp+i]) begin
-        next_warp = last_warp + i;
+    warp_num_t i = last_warp;
+    repeat (`WARP_MAX_NUM) begin
+      if (pc_table.valid[i]) begin
+        next_warp = i;
         break;
       end
+      i++;
     end
   end
 

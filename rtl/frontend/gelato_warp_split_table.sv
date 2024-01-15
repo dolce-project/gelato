@@ -26,12 +26,13 @@ module gelato_warp_split_table (
   assign update.thread_mask = split_table[update.split_table_num].thread_mask;
 
   always_comb begin
-    for (split_table_num_t i = 0; i != `SPLIT_TABLE_MAX_NUM; i++) begin
-      split_table_num_t j = last_table_num + i;
-      if (split_table[j].valid) begin
-        next_table_num = j;
+    split_table_num_t i = last_table_num;
+    repeat (`SPLIT_TABLE_NUM) begin
+      if (split_table[i].valid) begin
+        next_table_num = i;
         break;
       end
+      i++;
     end
   end
 
