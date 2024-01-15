@@ -47,6 +47,16 @@ package gelato_types;
     logic [`FUNCT3_INDEX] funct3;
     logic [`FUNCT7_INDEX] funct7;
   } inst_t;
+
+  typedef struct packed {
+    logic valid;
+    logic active;
+    addr_t current_pc;
+    addr_t reconv_pc;
+    split_table_num_t reconv_table_num;
+    thread_mask_t thread_mask;
+    thread_mask_t arrived_mask;
+  } split_table_entry_t;
 endpackage
 
 `endif

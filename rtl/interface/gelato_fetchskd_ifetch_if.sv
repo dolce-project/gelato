@@ -9,6 +9,9 @@
 interface gelato_fetchskd_ifetch_if;
   import gelato_types::*;
 
+  // Reday State
+  logic ready;
+
   // Information of the selected program counter
   logic valid;
   addr_t pc;
@@ -16,10 +19,10 @@ interface gelato_fetchskd_ifetch_if;
   split_table_num_t split_table_num;
 
   // Fetch Scheduler -> I-Fetch
-  modport master(output valid, output pc, output warp_num, output split_table_num);
+  modport master(input ready, output valid, output pc, output warp_num, output split_table_num);
 
   // I-Fetch -> Fetch Scheduler
-  modport slave(input valid, input pc, input warp_num, input split_table_num);
+  modport slave(output ready, input valid, input pc, input warp_num, input split_table_num);
 
 endinterface
 

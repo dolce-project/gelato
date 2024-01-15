@@ -21,14 +21,14 @@ module gelato_fetch_scheduler (
   import gelato_types::*;
 
   // Selected warp number and last number (used to generate new num)
-  warp_num_t selected_warp;
+  warp_num_t next_warp;
   warp_num_t last_warp;
 
   // Generate new selected warp number
   always_comb begin
     for (warp_num_t i = 0; i != `WARP_MAX_NUM; i++) begin
       if (pc_table.valid[last_warp + i]) begin
-        selected_warp = last_warp + i;
+        next_warp = last_warp + i;
         break;
       end
     end
@@ -38,15 +38,20 @@ module gelato_fetch_scheduler (
     if (!rst_n) begin
       last_warp <= 0;
       inst_pc.valid <= 0;
+      pc_table.selected <= 0;
     end else if (rdy) begin
-      // Send the selected pc to the fetch unit
-      inst_pc.valid <= pc_table.valid[selected_warp];
-      inst_pc.pc <= pc_table.pc[selected_warp];
-      inst_pc.warp_num <= selected_warp;
-      inst_pc.split_table_num <= pc_table.split_table_num[selected_warp];
+      if (inst_pc.ready) begin
+        // Send the selected pc to the fetch unit
+        inst_pc.valid <= pc_table.valid[next_warp];
+        inst_pc.pc <= pc_table.pc[next_warp];
+        inst_pc.warp_num <= next_warp;
+        inst_pc.split_table_num <= pc_table.split_table_num[next_warp];
 
-      // Update last warp number
-      last_warp <= selected_warp;
+        // Update last warp number
+        last_warp <= next_warp;
+      end else begin
+        pc_table.selected <= 0;
+      end
     end
   end
 endmodule
