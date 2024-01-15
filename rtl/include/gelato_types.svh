@@ -24,6 +24,12 @@ package gelato_types;
 
   typedef logic [`L1_CACHE_ADDR_INDEX] l1_cache_addr_t;
 
+  typedef logic [`L1_CACHE_INDEX_INDEX] l1_cache_index_t;
+
+  typedef logic [`L1_CACHE_TAG_INDEX] l1_cache_tag_t;
+
+  typedef logic [`L1_CACHE_OFFSET_INDEX] l1_cache_offset_t;
+
   typedef logic [`L1_CACHE_LINE_SIZE-1:0] l1_cache_line_t;
 
   typedef logic [`WARP_NUM_INDEX] warp_num_t;
@@ -57,6 +63,12 @@ package gelato_types;
     thread_mask_t thread_mask;
     thread_mask_t arrived_mask;
   } split_table_entry_t;
+
+  typedef struct packed {
+    logic valid;
+    l1_cache_tag_t tag;
+    l1_cache_line_t data;
+  } l1_cache_entry_t;
 endpackage
 
 `endif

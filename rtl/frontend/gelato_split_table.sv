@@ -13,6 +13,8 @@ module gelato_split_table (
   input logic rst_n,
   input logic rdy,
 
+  gelato_init_if.slave init,
+
   gelato_pctable_fetchskd_if.master pc_table,
   gelato_idecode_split_if.slave split_data
 );
@@ -20,9 +22,16 @@ module gelato_split_table (
 
   gelato_split_table_select_pc_if select[`WARP_NUM];
   gelato_split_table_update_pc_if update[`WARP_NUM];
+  gelato_init_if warp_init[`WARP_NUM];
 
-  generate;
-    for (genvar i = 0; i < `WARP_NUM; i++) begin: gen_split_table
+  warp_num_t init_max_warp_num;
+  thread_num_t init_last_thread_num;
+
+  assign init_max_warp_num = init.workers[`WARP_NUM_WIDTH+`THREAD_NUM_WIDTH-1:`THREAD_NUM_WIDTH];
+  assign init_last_thread_num = init.workers[`THREAD_NUM_WIDTH-1:0];
+
+  generate
+    for (genvar i = 0; i < `WARP_NUM; i++) begin : gen_split_table
       // Select update data
       assign update[i].valid = split_data.valid & (split_data.warp_num == i);
       assign update[i].stall = split_data.stall;
@@ -34,14 +43,20 @@ module gelato_split_table (
       assign pc_table.pc[i] = select[i].pc;
       assign pc_table.split_table_num[i] = select[i].split_table_num;
 
+      // Init PC
+      assign warp_init[i].valid = init.valid & init_max_warp_num >= i;
+      assign warp_init[i].pc = init.pc;
+      assign warp_init[i].workers[`THREAD_NUM_INDEX] = (init_max_warp_num == i[`WARP_NUM_INDEX]) ? init_last_thread_num : `THREAD_NUM;
+
       // Create split table for i-th warp
       gelato_warp_split_table split_table (
-        .clk(clk),
+        .clk  (clk),
         .rst_n(rst_n),
-        .rdy(rdy),
+        .rdy  (rdy),
 
         .select(select[i]),
-        .update(update[i])
+        .update(update[i]),
+        .init  (warp_init[i])
       );
 
       always_comb begin

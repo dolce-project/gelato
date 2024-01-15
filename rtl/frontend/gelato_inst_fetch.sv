@@ -14,7 +14,7 @@ module gelato_inst_fetch (
   gelato_fetchskd_ifetch_if.slave inst_pc,
 
   // I-Cache <-> I-Fetch
-  gelato_mem_if.slave inst_cache_request,
+  gelato_l1_cache_if.slave inst_cache_request,
 
   // I-Fetch <-> I-Buffer
   gelato_ifetch_idecode_if.master inst_raw_data

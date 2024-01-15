@@ -5,20 +5,20 @@
 
 `include "gelato_types.svh"
 
-interface gelato_mem_if;
+interface gelato_l2_cache_if;
   import gelato_types::*;
 
-  // I-Fetch / Load Store Buffer -> I-Cache / D-Cache
+  // L1 Cache -> L2 Cache
   logic valid;
   addr_t addr;
 
-  // I-Cache / D-Cache -> I-Fetch / Load Store Buffer
+  // L2 Cache -> L1 Cache
   logic done;
   data_t data;
 
-  // I-Cache
+  // L2 Cache
   modport master(input valid, input addr, output done, output data);
 
-  // I-Fetch
-  modport slave(output valid, output addr, input done, input data);
+  // L1 Cache
+  modport slave(input valid, output addr, input done, input data);
 endinterface

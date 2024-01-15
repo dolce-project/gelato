@@ -8,17 +8,17 @@
 interface gelato_l1_cache_if;
   import gelato_types::*;
 
-  // L1 Cache -> L2 Cache
+  // I-Fetch / Load Store Buffer -> I-Cache / D-Cache
   logic valid;
-  l1_cache_addr_t addr;
+  addr_t addr;
 
-  // L2 Cache -> L1 Cache
+  // I-Cache / D-Cache -> I-Fetch / Load Store Buffer
   logic done;
-  l1_cache_line_t data;
+  data_t data;
 
-  // L2 Cache
+  // I-Cache
   modport master(input valid, input addr, output done, output data);
 
-  // L1 Cache
-  modport slave(input valid, output addr, input done, input data);
+  // I-Fetch
+  modport slave(output valid, output addr, input done, input data);
 endinterface

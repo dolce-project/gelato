@@ -14,7 +14,8 @@ module gelato_warp_split_table (
   input logic rdy,
 
   gelato_split_table_select_pc_if.master select,
-  gelato_split_table_update_pc_if.slave update
+  gelato_split_table_update_pc_if.slave  update,
+  gelato_init_if.slave    init
 );
   import gelato_types::*;
 
@@ -22,6 +23,7 @@ module gelato_warp_split_table (
 
   split_table_num_t next_table_num;
   split_table_num_t last_table_num;
+  logic init_done;
 
   assign update.thread_mask = split_table[update.split_table_num].thread_mask;
 
@@ -41,17 +43,35 @@ module gelato_warp_split_table (
       last_table_num <= 0;
       select.pc <= 0;
       select.split_table_num <= 0;
-    end else if (rdy && update.valid) begin
-      // Update the split table
-      split_table[update.split_table_num].active <= !update.stall;
-      split_table[update.split_table_num].current_pc <= update.pc;
+    end else if (rdy) begin
+      if (update.valid || init_done) begin
+        // Update the split table
+        split_table[update.split_table_num].active <= !update.stall;
+        split_table[update.split_table_num].current_pc <= update.pc;
 
-      // Select the next entry
-      select.split_table_num <= next_table_num;
-      select.pc <= split_table[next_table_num].current_pc;
-      select.valid <= split_table[next_table_num].valid & split_table[next_table_num].active;
-      split_table[next_table_num].active <= 0;
-      last_table_num <= next_table_num;
+        // Select the next entry
+        select.split_table_num <= next_table_num;
+        select.pc <= split_table[next_table_num].current_pc;
+        select.valid <= split_table[next_table_num].valid & split_table[next_table_num].active;
+        split_table[next_table_num].active <= 0;
+        last_table_num <= next_table_num;
+
+        // Clear init_done
+        init_done <= 0;
+      end else if (init.valid) begin
+        // Initialize the split table
+        split_table_num_t i = 0;
+        split_table[i].valid <= 1;
+        split_table[i].active <= 0;
+        split_table[i].current_pc <= init.pc;
+        split_table[i].thread_mask <= {`THREAD_NUM{1'b1}};
+        repeat (`SPLIT_TABLE_NUM - 1) begin
+          split_table[++i].valid <= 0;
+        end
+
+        // Set init_done
+        init_done <= 1;
+      end
     end
   end
 endmodule

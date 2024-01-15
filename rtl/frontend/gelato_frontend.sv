@@ -8,10 +8,13 @@
 module gelato_frontend (
   input logic clk,
   input logic rst_n,
-  input logic rdy
+  input logic rdy,
+
+  gelato_init_if.slave init,
+  gelato_ram_if.slave fetch_data
 );
   gelato_fetchskd_ifetch_if inst_pc;
-  gelato_mem_if inst_cache_request;
+  gelato_l1_cache_if inst_cache_request;
   gelato_ifetch_idecode_if inst_raw_data;
 
   gelato_inst_fetch inst_fetch_unit (
@@ -37,12 +40,13 @@ module gelato_frontend (
     .inst_decoded_data(inst_decoded_data)
   );
 
-  gelato_inst_cache inst_cache (
+  gelato_l1_inst_cache inst_cache (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
 
-    .inst_cache_request(inst_cache_request)
+    .inst_cache_request(inst_cache_request),
+    .fetch_data(fetch_data)
   );
 
   gelato_pctable_fetchskd_if pc_table;
@@ -60,6 +64,8 @@ module gelato_frontend (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
+
+    .init(init),
 
     .pc_table(pc_table),
     .split_data(split_data)
