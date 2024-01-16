@@ -40,6 +40,7 @@ module gelato_warp_split_table (
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
+      init_done <= 0;
       last_table_num <= 0;
       select.pc <= 0;
       select.split_table_num <= 0;
@@ -61,10 +62,10 @@ module gelato_warp_split_table (
       end else if (init.valid) begin
         // Initialize the split table
         split_table_num_t i = 0;
-        split_table[i].valid <= 1;
-        split_table[i].active <= 0;
-        split_table[i].current_pc <= init.pc;
-        split_table[i].thread_mask <= {`THREAD_NUM{1'b1}};
+        split_table[0].valid <= 1;
+        split_table[0].active <= 1;
+        split_table[0].current_pc <= init.pc;
+        split_table[0].thread_mask <= {`THREAD_NUM{1'b1}};
         repeat (`SPLIT_TABLE_NUM - 1) begin
           split_table[++i].valid <= 0;
         end
