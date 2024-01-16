@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
-// This file contains the implementation of the frontend of the Gelato GPU.
+// This file contains the implementation of the fetch unit of the Gelato GPU.
 
-module gelato_frontend (
+module gelato_fetch (
   input logic clk,
   input logic rst_n,
   input logic rdy,
