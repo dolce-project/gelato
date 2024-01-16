@@ -11,5 +11,4 @@ else
   exit 1
 fi
 echo "Start running simulation..."
-cd obj_dir
-./Vtop
+./obj_dir/Vtop
