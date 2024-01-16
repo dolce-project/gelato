@@ -28,7 +28,7 @@ module gelato_inst_decode (
   status_t status;
 
   always_comb begin  // Decode instruction by combinational logic
-    inst.opcode = inst_raw_data.inst[31:25];
+    inst.opcode = inst_raw_data.inst[6:0];
     case (inst.opcode)
       `OPCODE_LUI, `OPCODE_AUIPC: begin
         inst.rd  = inst_raw_data.inst[11:7];
@@ -115,6 +115,7 @@ module gelato_inst_decode (
 
           // Update the split table
           split_data.valid <= 1;
+          split_data.activate <= !(inst.opcode == `OPCODE_BRANCH && (inst.funct3 == `FUNCT3_SEQ || inst.funct3 == `FUNCT3_SNE));
           if (inst.opcode == `OPCODE_AUIPC || inst.opcode == `OPCODE_BRANCH) begin
             split_data.stall <= 1;
           end else if (inst.opcode == `OPCODE_JAL || inst.opcode == `OPCODE_JALR) begin

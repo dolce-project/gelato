@@ -44,34 +44,29 @@ module gelato_warp_split_table (
       last_table_num <= 0;
       select.pc <= 0;
       select.split_table_num <= 0;
-    end else if (rdy) begin
-      if (update.valid || init_done) begin
-        // Update the split table
-        split_table[update.split_table_num].active <= !update.stall;
-        split_table[update.split_table_num].current_pc <= update.pc;
 
-        // Select the next entry
-        select.split_table_num <= next_table_num;
-        select.pc <= split_table[next_table_num].current_pc;
-        select.valid <= split_table[next_table_num].valid & split_table[next_table_num].active;
-        split_table[next_table_num].active <= 0;
-        last_table_num <= next_table_num;
-
-        // Clear init_done
-        init_done <= 0;
-      end else if (init.valid) begin
-        // Initialize the split table
-        split_table_num_t i = 0;
+      // Initialize the split table
+      if (init.valid) begin
         split_table[0].valid <= 1;
         split_table[0].active <= 1;
         split_table[0].current_pc <= init.pc;
         split_table[0].thread_mask <= {`THREAD_NUM{1'b1}};
-        repeat (`SPLIT_TABLE_NUM - 1) begin
-          split_table[++i].valid <= 0;
-        end
+        // split_table_num_t i = 0;
+        // repeat (`SPLIT_TABLE_NUM - 1) begin
+        //   split_table[++i].valid <= 0;
+        // end
+      end
+    end else if (rdy) begin
+      // Update the pc table entry
+      select.split_table_num <= next_table_num;
+      select.pc <= split_table[next_table_num].current_pc;
+      select.valid <= split_table[next_table_num].valid & split_table[next_table_num].active;
+      last_table_num <= next_table_num;
 
-        // Set init_done
-        init_done <= 1;
+      if (update.valid) begin
+        // Update the split table
+        split_table[update.split_table_num].active <= !update.stall;
+        split_table[update.split_table_num].current_pc <= update.pc;
       end
     end
   end

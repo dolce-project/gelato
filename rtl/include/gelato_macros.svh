@@ -20,7 +20,7 @@
 `define NUM_INDEX 31:0
 
 // Memory configuration
-`define RAM_SIZE 1024 // 1 KB RAM
+`define RAM_SIZE 1<<20 // 1 MB RAM
 
 // Cache configuration
 // L1 Cache

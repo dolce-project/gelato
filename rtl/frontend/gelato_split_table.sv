@@ -78,4 +78,15 @@ module gelato_split_table (
       end
     end
   endgenerate
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      pc_table.activate_valid <= 0;
+    end else if (rdy) begin
+      if (split_data.valid) begin
+        pc_table.activate_valid <= split_data.activate;
+        pc_table.activate_warp_num <= split_data.warp_num;
+      end
+    end
+  end
 endmodule

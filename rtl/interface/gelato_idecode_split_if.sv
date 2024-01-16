@@ -17,6 +17,7 @@ interface gelato_idecode_split_if;
   // Basic Information
   logic valid;
   logic stall;
+  logic activate;
   addr_t updated_pc;
 
   // I-Decode -> Split Table
@@ -26,6 +27,7 @@ interface gelato_idecode_split_if;
     input thread_mask,
     output valid,
     output stall,
+    output activate,
     output updated_pc
   );
 
@@ -36,6 +38,7 @@ interface gelato_idecode_split_if;
     output thread_mask,
     input valid,
     input stall,
+    input activate,
     input updated_pc
   );
 endinterface

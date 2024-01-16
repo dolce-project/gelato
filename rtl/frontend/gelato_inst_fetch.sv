@@ -23,8 +23,6 @@ module gelato_inst_fetch (
   typedef enum { IDLE, WAIT_MEM } status_t;
   status_t status;
 
-  assign inst_pc.ready = (status == IDLE);
-
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       status <= IDLE;
@@ -32,6 +30,9 @@ module gelato_inst_fetch (
       case (status)
         IDLE: begin
           if (inst_pc.valid) begin
+            // Caught
+            inst_pc.caught <= 1;
+
             // Initialize the raw data
             inst_raw_data.valid <= 0;
             inst_raw_data.pc <= inst_pc.pc;

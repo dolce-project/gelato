@@ -13,9 +13,24 @@ interface gelato_pctable_fetchskd_if;
   addr_t pc[`WARP_NUM];
   split_table_num_t split_table_num[`WARP_NUM];
 
+  logic activate_valid;
+  warp_num_t activate_warp_num;
+
   // PC Table -> I-Fetch
-  modport master(output valid, output pc, output split_table_num);
+  modport master(
+    output valid,
+    output pc,
+    output split_table_num,
+    output activate_valid,
+    output activate_warp_num
+  );
 
   // I-Fetch -> PC Table
-  modport slave(input valid, input pc, input split_table_num);
+  modport slave(
+    input valid,
+    input pc,
+    input split_table_num,
+    input activate_valid,
+    input activate_warp_num
+  );
 endinterface

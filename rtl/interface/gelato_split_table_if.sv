@@ -12,7 +12,6 @@ interface gelato_split_table_select_pc_if;
   logic valid;
   addr_t pc;
   split_table_num_t split_table_num;
-  thread_mask_t thread_mask;
 
   // Warp Split Table -> Split Table
   modport master(output valid, output pc, output split_table_num);
