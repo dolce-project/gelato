@@ -36,7 +36,7 @@ module gelato_fetch_scheduler (
   always_comb begin
     warp_num_t i = last_warp + 1;
     repeat (`WARP_MAX_NUM) begin
-      if (pc_table.valid[i] & !warp_disabled[i]) begin
+      if (pc_table.valid[i] && !warp_disabled[i]) begin
         next_warp = i;
         break;
       end
@@ -56,7 +56,7 @@ module gelato_fetch_scheduler (
     end else if (rdy) begin
       case (status)
         GENERATE_PC: begin
-          if (pc_table.valid[next_warp]) begin
+          if (pc_table.valid[next_warp] && !warp_disabled[next_warp]) begin
             // Send the pc to the fetch unit
             inst_pc.valid <= 1;
             inst_pc.pc <= pc_table.pc[next_warp];

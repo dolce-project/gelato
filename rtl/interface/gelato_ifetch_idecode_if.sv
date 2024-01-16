@@ -18,8 +18,8 @@ interface gelato_ifetch_idecode_if;
   data_t inst;
 
   // I-Fetch -> I-Decode
-  modport master(output valid, output pc, output warp_num, output split_table_num, output inst);
+  modport master(inout valid, output pc, output warp_num, output split_table_num, output inst);
 
   // I-Decode -> I-Fetch
-  modport slave(input valid, input pc, input warp_num, input split_table_num, input inst);
+  modport slave(inout valid, input pc, input warp_num, input split_table_num, input inst);
 endinterface

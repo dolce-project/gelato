@@ -103,6 +103,7 @@ module gelato_inst_decode (
       case (status)
         IDLE: begin
           if (inst_raw_data.valid) begin
+            inst_raw_data.valid <= 0;
             split_data.warp_num <= inst_raw_data.warp_num;
             split_data.split_table_num <= inst_raw_data.split_table_num;
             status <= UPDATE;
@@ -113,10 +114,16 @@ module gelato_inst_decode (
         UPDATE: begin
           // Deliver the decoded instruction to the I-Buffer
           inst_decoded_data.inst <= inst;
+          inst_decoded_data.valid <= 1;
+
+          $display("Decode %h: opcode = %b, rd = %d, rs1 = %d, rs2 = %d, imm = %d",
+            inst.pc, inst.opcode, inst.rd, inst.rs1, inst.rs2, inst.imm);
 
           // Update the split table
           split_data.valid <= 1;
-          split_data.activate <= !(inst.opcode == `OPCODE_BRANCH && (inst.funct3 == `FUNCT3_SEQ || inst.funct3 == `FUNCT3_SNE));
+          split_data.activate <=
+            !(inst.opcode == `OPCODE_BRANCH &&
+            (inst.funct3 == `FUNCT3_SEQ || inst.funct3 == `FUNCT3_SNE));
           if (inst.opcode == `OPCODE_AUIPC || inst.opcode == `OPCODE_BRANCH) begin
             split_data.stall <= 1;
           end else if (inst.opcode == `OPCODE_JAL || inst.opcode == `OPCODE_JALR) begin
