@@ -88,7 +88,11 @@ module gelato_warp_scheduler (
           if (valid[next_warp]) begin
             // Send the instruction to the collector
             issued_inst.valid <= 1;
-            issued_inst.inst <= buffer.inst[next_warp];
+            issued_inst.inst  <= buffer.inst[next_warp];
+
+            $display("Issued instruction: %h, dirty regs: %d %d %d %d", buffer.inst[next_warp].pc,
+                     dirty_regs[next_warp][0], dirty_regs[next_warp][1], dirty_regs[next_warp][2],
+                     dirty_regs[next_warp][3]);
 
             // Update status
             status <= WAIT_CAUGHT;

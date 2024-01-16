@@ -25,9 +25,11 @@ module gelato_split_table (
   gelato_init_if warp_init[`WARP_NUM];
   warp_num_t warp_num[`WARP_NUM];
 
+  logic init_all_warp;
   warp_num_t init_max_warp_num;
   thread_num_t init_last_thread_num;
 
+  assign init_all_warp = init.workers[`WARP_NUM_WIDTH+`THREAD_NUM_WIDTH];
   assign init_max_warp_num = init.workers[`WARP_NUM_WIDTH+`THREAD_NUM_WIDTH-1:`THREAD_NUM_WIDTH];
   assign init_last_thread_num = init.workers[`THREAD_NUM_WIDTH-1:0];
 
@@ -51,7 +53,7 @@ module gelato_split_table (
       assign warp_init[i].valid = init.valid & warp_init[i].workers != {`THREAD_NUM{1'b0}};
 
       always_comb begin
-        if (warp_num[i] < init_max_warp_num) begin
+        if (init_all_warp || warp_num[i] < init_max_warp_num) begin
           warp_init[i].workers = {`THREAD_NUM{1'b1}};
         end else if (warp_num[i] == init_max_warp_num) begin
           warp_init[i].workers = {{(32 - `THREAD_NUM_WIDTH) {1'b0}}, init_last_thread_num};

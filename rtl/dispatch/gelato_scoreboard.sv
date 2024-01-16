@@ -38,7 +38,7 @@ module gelato_scoreboard (
     end
   endgenerate
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       foreach (dirty_regs[i,j]) begin
         dirty_regs[i][j] <= 0;
@@ -49,6 +49,7 @@ module gelato_scoreboard (
           $fatal(0, "Scoreboard full!");
         end
         dirty_regs[record.warp_num][empty_slot[record.warp_num]] <= record.new_reg;
+        record.new_reg <= 0;
       end
     end
   end

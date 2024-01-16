@@ -41,8 +41,13 @@ module gelato_warp_inst_buffer (
       push_enabled <= 0;
     end else if (rdy) begin
       if (inst_decoded_data.valid) begin
+        if (warp_data.full) begin
+          $fatal(0, "Warp instruction buffer is full!");
+        end
         push_enabled <= 1;
         push_data    <= inst_decoded_data.inst;
+      end else begin
+        push_enabled <= 0;
       end
     end
   end

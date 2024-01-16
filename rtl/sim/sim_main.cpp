@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-const int kMaxSimTime = 200;
+const int kMaxSimTime = 20000;
 
 double sc_time_stamp() { return 0; }
 

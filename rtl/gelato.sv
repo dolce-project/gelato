@@ -33,4 +33,11 @@ module gelato (
     .inst_decoded_data(inst_decoded_data),
     .issued_inst(issued_inst)
   );
+
+  gelato_register_file register_file (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+    .issued_inst(issued_inst)
+  );
 endmodule

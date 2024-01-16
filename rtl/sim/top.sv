@@ -16,7 +16,7 @@ module top (
 
   assign init.valid = init_rdy;
   assign init.pc = 0;
-  assign init.workers = `THREAD_NUM;
+  assign init.workers = `THREAD_NUM * 4;
 
   gelato gelato (
     .clk(clk),
