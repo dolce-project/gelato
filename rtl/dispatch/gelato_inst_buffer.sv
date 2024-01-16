@@ -3,52 +3,50 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
-// This file contains the implementation of the instruction buffer of the Gelato GPU.
-
-`include "gelato_macros.svh"
-`include "gelato_types.svh"
+// This file contains the implementation of the instruction buffer of each warp in the Gelato GPU.
 
 module gelato_inst_buffer (
   input logic clk,
   input logic rst_n,
   input logic rdy,
 
-  input logic pop_enabled,
-  output inst_t tail_data,
-
-  gelato_idecode_ibuffer_if.slave inst_decoded_data
+  gelato_idecode_ibuffer_if.slave  inst_decoded_data,
+  gelato_ibuffer_warpskd_if.master buffer
 );
-  import gelato_types::*;
+  gelato_idecode_ibuffer_if warp_inst_decoded_data[`WARP_NUM];
+  logic warp_pop_enabled[`WARP_NUM];
+  logic warp_full[`WARP_NUM];
+  logic warp_empty[`WARP_NUM];
+  inst_t warp_tail_data[`WARP_NUM];
 
-  logic  push_enabled;
-  inst_t push_data;
-  logic  empty;
-  logic  full;
+  generate
+    for (genvar i = 0; i < WARPS_PER_SM; i++) begin : gen_warp_buffer
+      assign warp_inst_decoded_data[i].valid =
+        inst_decoded_data.valid &&
+        inst_decoded_data.warp_num == i;
+      assign warp_inst_decoded_data[i].inst = inst_decoded_data.inst;
 
-  gelato_queue #(
-    .T(inst_t),
-    .WIDTH(`BUFFER_SIZE_WIDTH)
-  ) inst_queue (
-    .clk  (clk),
-    .rst_n(rst_n),
-    .rdy  (rdy),
-    .push_enabled(push_enabled),
-    .push_data(push_data),
-    .pop_enabled(pop_enabled),
-    .tail_data  (tail_data),
-    .empty(empty),
-    .full (full)
-  );
+      assign warp_pop_enabled[i] = buffer.caught[i];
+      assign buffer.valid[i] = !warp_empty[i];
+      assign buffer.inst[i] = warp_tail_data[i];
 
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-      push_enabled <= 0;
-      pop_enabled  <= 0;
-    end else if (rdy) begin
-      if (inst_decoded_data.valid) begin
-        push_enabled <= 1;
-        push_data    <= inst_decoded_data.inst;
+      gelato_warp_inst_buffer_unit inst_buffer_unit (
+        .clk  (clk),
+        .rst_n(rst_n),
+        .rdy  (rdy),
+
+        .pop_enabled      (warp_pop_enabled[i]),
+        .full             (warp_full[i]),
+        .empty            (warp_empty[i]),
+        .tail_data        (warp_tail_data[i]),
+        .inst_decoded_data(inst_decoded_data),
+      );
+
+      always_ff @(posedge clk or negedge rst_n) begin
+        if (buffer.caught[i]) begin
+          buffer.caught[i] <= 0;
+        end
       end
     end
-  end
+  endgenerate
 endmodule
