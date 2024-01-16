@@ -8,7 +8,7 @@ The fetch of instruction was divided into three stages: fetch, decode and update
 
 ### Instruction Fetcher
 
-The instruction fetcher has two status: WAIT_MEM. When it is in the IDLE status, it receives a new instruction information from fetch scheduler. If I-Cache hits, it turns its status to IDLE and send the instruction to decoder. Otherwise, it turns its status to WAIT_MEM and send the request to I-Cache.
+The instruction fetcher has two status: WAIT_MEM. When it is in the IDLE status, it receives a new instruction information from fetch scheduler and let fetch scheduler to send a new instruction address the next cycle to waiting slot. If I-Cache hits, it turns its status to IDLE and send the instruction to decoder. Otherwise, it turns its status to WAIT_MEM and send the request to I-Cache.
 
 ### Instruction Decoder
 
