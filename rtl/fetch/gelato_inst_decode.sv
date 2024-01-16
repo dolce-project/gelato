@@ -27,6 +27,10 @@ module gelato_inst_decode (
   inst_t   inst;  // Decoded instruction
   status_t status;
 
+  assign inst.pc = inst_raw_data.pc;
+  assign inst.warp_num = inst_raw_data.warp_num;
+  assign inst.thread_mask = split_data.thread_mask;
+
   always_comb begin  // Decode instruction by combinational logic
     inst.opcode = inst_raw_data.inst[6:0];
     case (inst.opcode)
@@ -108,9 +112,6 @@ module gelato_inst_decode (
         end
         UPDATE: begin
           // Deliver the decoded instruction to the I-Buffer
-          inst_decoded_data.pc <= inst_raw_data.pc;
-          inst_decoded_data.warp_num <= inst_raw_data.warp_num;
-          inst_decoded_data.thread_mask <= split_data.thread_mask;
           inst_decoded_data.inst <= inst;
 
           // Update the split table

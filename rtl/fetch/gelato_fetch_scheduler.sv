@@ -34,7 +34,7 @@ module gelato_fetch_scheduler (
 
   // Generate new selected warp number
   always_comb begin
-    warp_num_t i = last_warp;
+    warp_num_t i = last_warp + 1;
     repeat (`WARP_MAX_NUM) begin
       if (pc_table.valid[i] & !warp_disabled[i]) begin
         next_warp = i;

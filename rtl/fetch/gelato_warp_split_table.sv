@@ -28,7 +28,7 @@ module gelato_warp_split_table (
   assign update.thread_mask = split_table[update.split_table_num].thread_mask;
 
   always_comb begin
-    split_table_num_t i = last_table_num;
+    split_table_num_t i = last_table_num + 1;
     repeat (`SPLIT_TABLE_NUM) begin
       if (split_table[i].valid) begin
         next_table_num = i;
