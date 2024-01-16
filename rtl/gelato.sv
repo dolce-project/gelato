@@ -13,11 +13,24 @@ module gelato (
   gelato_init_if.slave init,
   gelato_ram_if.slave ram
 );
+  gelato_idecode_ibuffer_if inst_decoded_data;
+
   gelato_fetch fetch_unit (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
     .init(init),
+    .inst_decoded_data(inst_decoded_data),
     .fetch_data(ram)
+  );
+
+  gelato_warpskd_collector_if issued_inst;
+
+  gelato_dispatch dispatch_unit (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+    .inst_decoded_data(inst_decoded_data),
+    .issued_inst(issued_inst)
   );
 endmodule

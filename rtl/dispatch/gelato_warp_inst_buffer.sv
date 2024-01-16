@@ -13,11 +13,7 @@ module gelato_warp_inst_buffer (
   input logic rst_n,
   input logic rdy,
 
-  input logic pop_enabled,
-  output logic full,
-  output logic empty,
-  output inst_t tail_data,
-
+  gelato_inst_buffer_if.master warp_data,
   gelato_idecode_ibuffer_if.slave inst_decoded_data
 );
   import gelato_types::*;
@@ -34,16 +30,15 @@ module gelato_warp_inst_buffer (
     .rdy  (rdy),
     .push_enabled(push_enabled),
     .push_data(push_data),
-    .pop_enabled(pop_enabled),
-    .tail_data  (tail_data),
-    .empty(empty),
-    .full (full)
+    .pop_enabled(warp_data.pop_enabled),
+    .tail_data  (warp_data.tail_data),
+    .empty(warp_data.empty),
+    .full (warp_data.full)
   );
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       push_enabled <= 0;
-      pop_enabled  <= 0;
     end else if (rdy) begin
       if (inst_decoded_data.valid) begin
         push_enabled <= 1;

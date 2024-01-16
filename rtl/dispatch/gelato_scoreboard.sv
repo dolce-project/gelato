@@ -21,13 +21,13 @@ module gelato_scoreboard (
   assign record.regs = dirty_regs;
 
   logic full[`WARP_NUM];
-  logic [`SCOREBOARD_SIZE_WIDTH] empty_slot[`WARP_NUM];
+  integer empty_slot[`WARP_NUM];
 
   generate;
     for (genvar i = 0; i < `WARP_NUM; i++) begin : gen_warp_full
       always_comb begin
         full[i] = 1;
-        foreach (dirty_regs[i][j]) begin
+        foreach (dirty_regs[i,j]) begin
           if (dirty_regs[i][j] == 0) begin
             full[i] = 0;
             empty_slot[i] = j;
@@ -40,7 +40,9 @@ module gelato_scoreboard (
 
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      dirty_regs <= '0;
+      foreach (dirty_regs[i,j]) begin
+        dirty_regs[i][j] <= 0;
+      end
     end else begin
       if (record.new_reg != 0) begin
         if (full[record.warp_num]) begin

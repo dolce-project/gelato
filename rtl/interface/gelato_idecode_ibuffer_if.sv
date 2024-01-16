@@ -17,8 +17,8 @@ interface gelato_idecode_ibuffer_if;
   inst_t inst;
 
   // I-Decode -> I-Buffer
-  modport master(output valid, output pc, output warp_num, output thread_mask, output inst);
+  modport master(output valid, output inst);
 
   // I-Buffer -> I-Decode
-  modport slave(input valid, input pc, input warp_num, input thread_mask, input inst);
+  modport slave(input valid, input inst);
 endinterface

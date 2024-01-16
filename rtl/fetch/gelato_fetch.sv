@@ -11,6 +11,7 @@ module gelato_fetch (
   input logic rdy,
 
   gelato_init_if.slave init,
+  gelato_idecode_ibuffer_if.master inst_decoded_data,
   gelato_ram_if.slave fetch_data
 );
   gelato_fetchskd_ifetch_if inst_pc;
@@ -28,7 +29,6 @@ module gelato_fetch (
   );
 
   gelato_idecode_split_if split_data;
-  gelato_idecode_ibuffer_if inst_decoded_data;
 
   gelato_inst_decode inst_decode_unit (
     .clk(clk),

@@ -16,9 +16,9 @@ module gelato_warp_scheduler (
   gelato_ibuffer_warpskd_if.slave buffer,
   gelato_scoreboard_warpskd_if.slave record,
 
-  gelato_warpskd_collector_if.master inst_out
+  gelato_warpskd_collector_if.master issued_inst
 );
-  import gelato_pkg::*;
+  import gelato_types::*;
 
   typedef enum {
     SELECT_INST,
@@ -31,6 +31,10 @@ module gelato_warp_scheduler (
   logic conflict[`WARP_NUM];
   reg_num_t rd[`WARP_NUM];
 
+  reg_num_t dirty_regs[`WARP_NUM][`SCOREBOARD_SIZE];
+
+  assign dirty_regs = record.regs;
+
   warp_num_t last_warp;
   warp_num_t next_warp;
 
@@ -38,10 +42,9 @@ module gelato_warp_scheduler (
     for (genvar i = 0; i < `WARP_NUM; i++) begin : gen_warp_valid
       // Generate full signal
       always_comb begin
-        integer j = 0;
         full[i] = 1;
-        repeat (`SCOREBOARD_SIZE) begin
-          if (record.regs[i][j++] == 0) begin
+        foreach (dirty_regs[i, j]) begin
+          if (dirty_regs[i][j] == 0) begin
             full[i] = 0;
             break;
           end
@@ -49,12 +52,10 @@ module gelato_warp_scheduler (
       end
       // Generate conflict signal
       always_comb begin
-        integer j = 0;
         conflict[i] = 0;
-        repeat (`SCOREBOARD_SIZE) begin
-          if (buffer.valid[i] && buffer.inst[i].rd != 0 && buffer.inst[i].rd == record.regs[i][
-            j++
-            ]) begin
+        foreach (dirty_regs[i, j]) begin
+          if (buffer.valid[i] && buffer.inst[i].rd != 0 &&
+              buffer.inst[i].rd == dirty_regs[i][j]) begin
             conflict[i] = 1;
             break;
           end
@@ -80,22 +81,23 @@ module gelato_warp_scheduler (
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       last_warp <= 0;
+      status <= SELECT_INST;
     end else if (rdy) begin
       case (status)
         SELECT_INST: begin
           if (valid[next_warp]) begin
             // Send the instruction to the collector
-            inst_out.valid <= 1;
-            inst_out.inst <= buffer.inst[next_warp];
+            issued_inst.valid <= 1;
+            issued_inst.inst <= buffer.inst[next_warp];
 
             // Update status
             status <= WAIT_CAUGHT;
           end
         end
         WAIT_CAUGHT: begin
-          if (inst_out.caught) begin
+          if (issued_inst.caught) begin
             // Update scoreboard and buffer
-            record.new_reg <= inst_out.inst.rd;
+            record.new_reg <= issued_inst.inst.rd;
             record.warp_num <= next_warp;
             buffer.caught[next_warp] <= 1;
 
@@ -104,8 +106,8 @@ module gelato_warp_scheduler (
             status <= SELECT_INST;
 
             // Clear output
-            inst_out.caught <= 0;
-            inst_out.valid <= 0;
+            issued_inst.caught <= 0;
+            issued_inst.valid <= 0;
           end
         end
         default: begin

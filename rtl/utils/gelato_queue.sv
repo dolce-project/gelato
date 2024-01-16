@@ -6,8 +6,8 @@
 // Queue for Gelato GPU
 
 module gelato_queue #(
-  type T,
-  parameter int WIDTH
+  type T = logic,
+  parameter int WIDTH = 0
 ) (
   input logic clk,
   input logic rst_n,

@@ -15,7 +15,7 @@ module top (
   gelato_init_if init;
 
   assign init.valid = init_rdy;
-  assign init.pc = `0;
+  assign init.pc = 0;
   assign init.workers = `THREAD_NUM;
 
   gelato gelato (

@@ -6,6 +6,8 @@
 `include "gelato_types.svh"
 
 interface gelato_warpskd_collector_if;
+  import gelato_types::*;
+
   logic valid;
   logic caught;
   inst_t inst;
