@@ -52,6 +52,10 @@ package gelato_types;
 
     logic [`FUNCT3_INDEX] funct3;
     logic [`FUNCT7_INDEX] funct7;
+
+    addr_t pc;
+    warp_num_t warp_num;
+    thread_mask_t thread_mask;
   } inst_t;
 
   typedef struct packed {
@@ -69,6 +73,11 @@ package gelato_types;
     l1_cache_tag_t tag;
     l1_cache_line_t data;
   } l1_cache_entry_t;
+
+  typedef struct packed {
+    logic valid;
+    inst_t inst;
+  } inst_buffer_entry_t;
 endpackage
 
 `endif

@@ -19,6 +19,14 @@
 `define NUM_WIDTH 32 // 32-bit number width
 `define NUM_INDEX 31:0
 
+// Instruction Buffer
+`define BUFFER_SIZE 4 // 4 instructions per warp
+`define BUFFER_SIZE_WIDTH 2
+
+// Scoreboard
+`define SCOREBOARD_SIZE 4 // 4 regs per warp
+`define SCOREBOARD_SIZE_WIDTH 2
+
 // Memory configuration
 `define RAM_SIZE 1<<20 // 1 MB RAM
 

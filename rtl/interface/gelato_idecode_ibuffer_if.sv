@@ -12,9 +12,6 @@ interface gelato_idecode_ibuffer_if;
 
   // Basic Information
   logic valid;
-  addr_t pc;
-  warp_num_t warp_num;
-  thread_mask_t thread_mask;
 
   // Decode instruction of the selected instruction
   inst_t inst;

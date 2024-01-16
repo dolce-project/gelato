@@ -13,7 +13,7 @@ module gelato (
   gelato_init_if.slave init,
   gelato_ram_if.slave ram
 );
-  gelato_frontend frontend (
+  gelato_fetch fetch_unit (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),

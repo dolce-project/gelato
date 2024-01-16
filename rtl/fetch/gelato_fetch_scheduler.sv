@@ -69,13 +69,14 @@ module gelato_fetch_scheduler (
         end
         WAIT_CAUGHT: begin
           if (inst_pc.caught) begin
+            // Invalidate the pc table entry
             warp_disabled[inst_pc.warp_num] <= 1;
 
             // Update last warp number and status
             last_warp <= next_warp;
             status <= GENERATE_PC;
 
-            // Invalidate the pc table entry
+            // Clear output
             inst_pc.caught <= 0;
             inst_pc.valid <= 0;
           end
