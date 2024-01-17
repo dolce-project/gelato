@@ -10,15 +10,16 @@ interface gelato_ram_if;
 
   // Core -> Memory
   logic valid;
+  logic write;
   addr_t addr;
 
   // Memory -> Core
   logic done;
   data_t data;
 
-  // Memory
-  modport master(input valid, input addr, output done, output data);
-
   // Core
-  modport slave(output valid, output addr, input done, input data);
+  modport master(output valid, output write, output addr, input done, input data);
+
+  // Memory
+  modport slave(input valid, input write, input addr, output done, output data);
 endinterface

@@ -16,13 +16,16 @@ module gelato (
   gelato_idecode_ibuffer_if inst_decoded_data;
   gelato_ibuffer_fetchskd_if buffer_status;
 
+  gelato_ram_if inst_ram;
+  gelato_ram_if data_ram;
+
   gelato_fetch fetch_unit (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
     .init(init),
     .inst_decoded_data(inst_decoded_data),
-    .fetch_data(ram),
+    .fetch_data(inst_ram),
     .buffer_status(buffer_status)
   );
 
@@ -62,6 +65,15 @@ module gelato (
     .rdy(rdy),
     .exec_inst(exec_compute_inst),
     .reg_wb(reg_wb[0])
+  );
+
+  gelato_load_store load_store_unit (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+    .exec_inst(exec_mem_inst),
+    .ram(data_ram),
+    .reg_wb(reg_wb[1])
   );
 
   logic [1:0] last_wb_signal, next_wb_signal;

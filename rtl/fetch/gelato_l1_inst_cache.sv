@@ -17,7 +17,7 @@ module gelato_l1_inst_cache (
   gelato_l1_cache_if.master inst_cache_request,
 
   // To RAM
-  gelato_ram_if.slave fetch_data
+  gelato_ram_if.master fetch_data
 );
   import gelato_types::*;
 

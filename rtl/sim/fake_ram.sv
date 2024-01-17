@@ -12,7 +12,7 @@ module fake_ram (
   input logic rst_n,
   input logic rdy,
 
-  gelato_ram_if.master ram
+  gelato_ram_if.slave ram
 );
   byte mem[`RAM_SIZE];
 

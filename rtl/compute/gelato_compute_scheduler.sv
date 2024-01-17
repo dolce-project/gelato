@@ -5,7 +5,6 @@
 
 // This file contains the implementation of the compute unit scheduler of the Gelato GPU.
 
-
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
@@ -55,9 +54,8 @@ module gelato_compute_scheduler (
     end else begin
       case (status)
         IDLE: begin
-          if (exec_inst.valid && !reg_wb.valid) begin
+          if (exec_inst.valid) begin
             compute_task.valid <= 1;
-            exec_inst.valid <= 0;
             status <= WAIT_COMPUTE;
           end
         end
@@ -65,6 +63,7 @@ module gelato_compute_scheduler (
           if (compute_task.done) begin
             $display("Finish executing instruction %h", exec_inst.inst.pc);
             compute_task.valid <= 0;
+            exec_inst.valid <= 0;
             reg_wb.valid <= 1;
             reg_wb.caught <= 0;
             reg_wb.data <= compute_task.rd;
