@@ -27,6 +27,11 @@
 `define SCOREBOARD_SIZE 4 // 4 regs per warp
 `define SCOREBOARD_SIZE_WIDTH 2
 
+// Operand Collector
+`define COLLECTOR_SIZE 4
+`define COLLECTOR_SIZE_WIDTH 2
+`define COLLECTOR_NUM_INDEX 1:0
+
 // Memory configuration
 `define RAM_SIZE 1<<20 // 1 MB RAM
 
@@ -85,6 +90,7 @@
 `define OPCODE_ARITHI 7'b0010011
 `define OPCODE_ARITH  7'b0110011
 `define OPCODE_NOOP   7'b0000000
+`define OPCODE_TENSOR 7'b0000000
 
 // Branch instructions with divergence
 `define FUNCT3_SEQ 3'b010
@@ -97,6 +103,15 @@
 
 `define REG_NUM_WIDTH 5
 `define REG_NUM_INDEX 4:0
+`define REG_NUM 32
+`define BANK_NUM_WIDTH 2
+`define BANK_NUM 4
+`define BANK_NUM_INDEX 1:0
+`define BANK_REG_NUM 8
+`define BANK_REG_WIDTH 3
+`define BANK_REG_INDEX 2:0
+`define RS_INDEX 1:3
+`define RS_NUM_INDEX 1:0
 
 `define FUNCT3_WIDTH 3
 `define FUNCT3_INDEX 2:0

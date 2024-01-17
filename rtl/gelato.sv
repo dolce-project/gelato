@@ -34,10 +34,17 @@ module gelato (
     .issued_inst(issued_inst)
   );
 
+  gelato_issue_inst_if issued_mem_inst;
+  gelato_issue_inst_if issued_compute_inst;
+  gelato_issue_inst_if issued_tensor_inst;
+
   gelato_register_file register_file (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
-    .issued_inst(issued_inst)
+    .issued_inst(issued_inst),
+    .issued_mem_inst(issued_mem_inst),
+    .issued_compute_inst(issued_compute_inst),
+    .issued_tensor_inst(issued_tensor_inst)
   );
 endmodule

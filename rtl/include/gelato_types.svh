@@ -40,6 +40,14 @@ package gelato_types;
 
   typedef logic [`SPLIT_TABLE_NUM_INDEX] split_table_num_t;
 
+  typedef logic [`BANK_NUM_INDEX] bank_num_t;
+
+  typedef logic [`COLLECTOR_NUM_INDEX] collector_num_t;
+
+  typedef logic [`RS_NUM_INDEX] rs_num_t;
+
+  typedef logic [(`THREAD_NUM*`DATA_WIDTH-1):0] warp_reg_t;
+
   typedef struct packed {
     opcode_t opcode;
 
@@ -78,6 +86,16 @@ package gelato_types;
     logic valid;
     inst_t inst;
   } inst_buffer_entry_t;
+
+  typedef struct {
+    logic valid;
+    logic ready;
+    inst_t inst;
+    
+    reg_num_t [`RS_INDEX] rs;
+    warp_reg_t [`RS_INDEX] rs_data;
+    logic [`RS_INDEX] rs_valid;
+  } collector_entry_t;
 endpackage
 
 `endif
