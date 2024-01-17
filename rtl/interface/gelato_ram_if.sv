@@ -18,8 +18,8 @@ interface gelato_ram_if;
   data_t data;
 
   // Core
-  modport master(output valid, output write, output addr, input done, input data);
+  modport master(output valid, output write, output addr, input done, inout data);
 
   // Memory
-  modport slave(input valid, input write, input addr, output done, output data);
+  modport slave(input valid, input write, input addr, output done, inout data);
 endinterface

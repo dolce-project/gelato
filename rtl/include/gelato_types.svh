@@ -96,9 +96,11 @@ package gelato_types;
   } collector_entry_t;
 
   typedef enum { 
-    ADD, SUB, MUL, DIV, MOD, 
-    AND, OR, XOR, SHL, SHR, 
-    EQ, NE, LT, LE, GT, GE
+    ADD, SUB, 
+    MUL, MULH, MULHSU, MULHU,
+    SLL, SRL, SRA,
+    AND, OR, XOR,
+    EQ, NE, LT, LTU, GT, GTU
   } arith_oper_t;
 
   typedef struct packed {

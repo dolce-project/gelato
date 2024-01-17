@@ -34,8 +34,9 @@ module gelato_load_store (
 
   generate
     for (genvar i = 0; i < `THREAD_NUM; i++) begin : gen_warp_data
-      assign addr[i] = exec_inst.inst.thread_mask[i] ? exec_inst.src1[(i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH] + exec_inst.inst.imm : 0;
-      assign write_data[i] = exec_inst.src2[(i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH];
+      assign addr[i] = exec_inst.inst.thread_mask[i] ?
+        exec_inst.rs1[(i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH] + exec_inst.inst.imm : 0;
+      assign write_data[i] = exec_inst.rs2[(i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH];
       assign warp_data[(i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH] = load_data[i];
     end
   endgenerate

@@ -108,15 +108,16 @@ module gelato_operand_collector (
         foreach (entries[i]) begin
           if (entries[i].valid && ready[i]) begin
             if (entries[i].inst.opcode != `OPCODE_LOAD && entries[i].inst.opcode != `OPCODE_STORE &&
-                entries[i].inst.opcode != `OPCODE_TENSOR) begin
+                entries[i].inst.opcode != `OPCODE_MARITH && entries[i].inst.opcode != `OPCODE_MLOAD &&
+                entries[i].inst.opcode != `OPCODE_MSTORE) begin
               $display("Executing compute instruction %h", entries[i].inst.pc);
               exec_compute_inst.valid <= 1;
               exec_compute_inst.collector_index_valid <= 1;
               exec_compute_inst.collector_index <= i[1:0];
               exec_compute_inst.inst <= entries[i].inst;
-              exec_compute_inst.src1 <= entries[i].rs_data1;
-              exec_compute_inst.src2 <= entries[i].rs_data2;
-              exec_compute_inst.src3 <= entries[i].rs_data3;
+              exec_compute_inst.rs1 <= entries[i].rs_data1;
+              exec_compute_inst.rs2 <= entries[i].rs_data2;
+              exec_compute_inst.rs3 <= entries[i].rs_data3;
               break;
             end
           end
@@ -136,9 +137,9 @@ module gelato_operand_collector (
               exec_mem_inst.collector_index_valid <= 1;
               exec_mem_inst.collector_index <= i[1:0];
               exec_mem_inst.inst <= entries[i].inst;
-              exec_mem_inst.src1 <= entries[i].rs_data1;
-              exec_mem_inst.src2 <= entries[i].rs_data2;
-              exec_mem_inst.src3 <= entries[i].rs_data3;
+              exec_mem_inst.rs1 <= entries[i].rs_data1;
+              exec_mem_inst.rs2 <= entries[i].rs_data2;
+              exec_mem_inst.rs3 <= entries[i].rs_data3;
               break;
             end
           end

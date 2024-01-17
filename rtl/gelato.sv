@@ -25,7 +25,7 @@ module gelato (
     .rdy(rdy),
     .init(init),
     .inst_decoded_data(inst_decoded_data),
-    .fetch_data(inst_ram),
+    .fetch_data(ram),
     .buffer_status(buffer_status)
   );
 
@@ -74,6 +74,15 @@ module gelato (
     .exec_inst(exec_mem_inst),
     .ram(data_ram),
     .reg_wb(reg_wb[1])
+  );
+
+  gelato_tensor tensor_unit (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+    .exec_inst(exec_tensor_inst),
+    .ram(data_ram),
+    .reg_wb(reg_wb[2])
   );
 
   logic [1:0] last_wb_signal, next_wb_signal;
