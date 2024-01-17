@@ -89,8 +89,8 @@ module gelato_warp_scheduler (
             // Send the instruction to the collector
             issued_inst.inst  <= buffer.inst[next_warp];
 
-            $display("Issued instruction: %h, dirty regs: %d %d %d %d",
-                     buffer.inst[next_warp].pc, dirty_regs[next_warp][0],
+            $display("Issued instruction: %h from warp %d, dirty regs: %d %d %d %d",
+                     buffer.inst[next_warp].pc, next_warp, dirty_regs[next_warp][0],
                      dirty_regs[next_warp][1], dirty_regs[next_warp][2],
                      dirty_regs[next_warp][3]);
 

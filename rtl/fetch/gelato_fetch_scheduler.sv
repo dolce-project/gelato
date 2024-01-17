@@ -16,7 +16,10 @@ module gelato_fetch_scheduler (
   gelato_pctable_fetchskd_if.slave pc_table,
 
   // Send the selected pc to the fetch unit
-  gelato_fetchskd_ifetch_if.master inst_pc
+  gelato_fetchskd_ifetch_if.master inst_pc,
+
+  // Receive the buffer information
+  gelato_ibuffer_fetchskd_if.slave buffer_status
 );
   import gelato_types::*;
 
@@ -30,13 +33,20 @@ module gelato_fetch_scheduler (
   warp_num_t next_warp;
   warp_num_t last_warp;
 
+  logic valid[`WARP_NUM];
   logic warp_disabled[`WARP_NUM];
+
+  generate
+    for (genvar i = 0; i < `WARP_NUM; i++) begin : gen_warp_valid
+      assign valid[i] = pc_table.valid[i] && !warp_disabled[i] && buffer_status.available[i];
+    end
+  endgenerate
 
   // Generate new selected warp number
   always_comb begin
     warp_num_t i = last_warp + 1;
     repeat (`WARP_MAX_NUM) begin
-      if (pc_table.valid[i] && !warp_disabled[i]) begin
+      if (valid[i]) begin
         next_warp = i;
         break;
       end
@@ -56,7 +66,7 @@ module gelato_fetch_scheduler (
     end else if (rdy) begin
       case (status)
         GENERATE_PC: begin
-          if (pc_table.valid[next_warp] && !warp_disabled[next_warp]) begin
+          if (valid[next_warp]) begin
             // Send the pc to the fetch unit
             inst_pc.valid <= 1;
             inst_pc.pc <= pc_table.pc[next_warp];

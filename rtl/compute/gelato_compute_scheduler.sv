@@ -66,6 +66,7 @@ module gelato_compute_scheduler (
             $display("Finish executing instruction %h", exec_inst.inst.pc);
             compute_task.valid <= 0;
             reg_wb.valid <= 1;
+            reg_wb.caught <= 0;
             reg_wb.data <= compute_task.rd;
             reg_wb.warp_num <= exec_inst.inst.warp_num;
             reg_wb.reg_num <= exec_inst.inst.rd;

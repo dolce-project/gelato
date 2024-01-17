@@ -13,8 +13,14 @@ module gelato_inst_buffer (
   input logic rst_n,
   input logic rdy,
 
-  gelato_idecode_ibuffer_if.slave  inst_decoded_data,
-  gelato_ibuffer_warpskd_if.master buffer
+  // Inform the fetch scheduler whether buffer is full
+  gelato_ibuffer_fetchskd_if.master buffer_status,
+
+  // Receive decoded instructions from the instruction decoder
+  gelato_idecode_ibuffer_if.slave   inst_decoded_data,
+
+  // Send buffer data to the warp scheduler
+  gelato_ibuffer_warpskd_if.master  buffer
 );
   import gelato_types::*;
 
@@ -27,6 +33,7 @@ module gelato_inst_buffer (
         inst_decoded_data.valid &&
         inst_decoded_data.inst.warp_num == i;
       assign warp_inst_decoded_data[i].inst = inst_decoded_data.inst;
+      assign buffer_status.available[i] = !warp_data[i].full;
 
       assign warp_data[i].pop_enabled = buffer.caught[i];
       assign buffer.valid[i] = !warp_data[i].empty;

@@ -10,6 +10,7 @@ interface gelato_reg_wb_if;
   import gelato_types::*;
 
   logic valid;
+  logic caught; // caught by scoreboard
   reg_num_t reg_num;
   warp_num_t warp_num;
   thread_mask_t thread_mask;
@@ -18,6 +19,7 @@ interface gelato_reg_wb_if;
   // Execute -> RF Arbiter
   modport master(
     inout valid,
+    inout caught,
     output reg_num,
     output warp_num,
     output thread_mask,
@@ -27,6 +29,7 @@ interface gelato_reg_wb_if;
   // RF Arbiter -> Execute
   modport slave(
     inout valid,
+    inout caught,
     input reg_num,
     input warp_num,
     input thread_mask,

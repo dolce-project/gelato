@@ -45,10 +45,11 @@ module gelato_scoreboard (
         dirty_regs[i][j] <= 0;
       end
     end else begin
-      if (reg_wb.valid) begin
-        foreach (dirty_regs[i,j]) begin
-          if (dirty_regs[i][j] == reg_wb.reg_num) begin
-            dirty_regs[i][j] <= 0;
+      if (reg_wb.valid && !reg_wb.caught) begin
+        reg_wb.caught <= 1;
+        foreach (dirty_regs[reg_wb.warp_num,j]) begin
+          if (dirty_regs[reg_wb.warp_num][j] == reg_wb.reg_num) begin
+            dirty_regs[reg_wb.warp_num][j] <= 0;
           end
         end
       end
