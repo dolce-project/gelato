@@ -53,8 +53,9 @@ module gelato_register_file_arbiter (
   end
 
   always_ff @(posedge clk or negedge rst_n) begin
-    if (rst_n) begin
+    if (!rst_n) begin
       response.valid <= 0;
+      status <= IDLE;
     end else begin
       case (status)
         IDLE: begin

@@ -33,17 +33,29 @@ module gelato_operand_collector (
 
   generate
     for (genvar i = 0; i < `COLLECTOR_SIZE; i++) begin : gen_collector_entries
-      assign ready[i] = !entries[i].rs_valid1 & !entries[i].rs_valid2 & !entries[i].rs_valid3;
+      assign ready[i] = (!entries[i].rs_valid1) && (!entries[i].rs_valid2) && (!entries[i].rs_valid3);
     end
   endgenerate
 
   logic full;
+  logic active;
   collector_num_t empty_slot;
   collector_num_t selected_entry;
 
   // Response data
   logic data_valid[`BANK_NUM];
   assign data_valid = response.data_valid;
+
+  // Generate active
+  always_comb begin
+    active = 0;
+    foreach (entries[i]) begin
+      if (entries[i].valid && !ready[i]) begin
+        active = 1;
+        break;
+      end
+    end
+  end
 
   // Genereate full and empty_slot
   always_comb begin
@@ -59,51 +71,104 @@ module gelato_operand_collector (
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
+      status <= GENERATE_REQUEST;
       foreach (entries[i]) begin
         entries[i].valid <= 0;
       end
     end else if (rdy) begin
+      $display("Operand collector");
+      $display("entry 0: valid = %b, pc = %h, ready = %b", entries[0].valid, entries[0].inst.pc, ready[0]);
+      $display("entry 1: valid = %b, pc = %h, ready = %b", entries[1].valid, entries[1].inst.pc, ready[1]);
+
+      // Receive issued instruction
+      if (issued_inst.valid && !full) begin
+        $display("Received issued instruction %h", issued_inst.inst.pc);
+        issued_inst.valid <= 0;
+        entries[empty_slot].valid <= 1;
+        entries[empty_slot].inst <= issued_inst.inst;
+        entries[empty_slot].rs1 <= {
+          {issued_inst.inst.rs1[4:3] + issued_inst.inst.warp_num},
+          issued_inst.inst.rs1[2:0]
+        };
+        entries[empty_slot].rs2 <= {
+          {issued_inst.inst.rs2[4:3] + issued_inst.inst.warp_num},
+          issued_inst.inst.rs2[2:0]
+        };
+        entries[empty_slot].rs3 <= {
+          {issued_inst.inst.rs3[4:3] + issued_inst.inst.warp_num},
+          issued_inst.inst.rs3[2:0]
+        };
+        entries[empty_slot].rs_valid1 <= issued_inst.inst.rs1 != 0;
+        entries[empty_slot].rs_valid2 <= issued_inst.inst.rs2 != 0;
+        entries[empty_slot].rs_valid3 <= issued_inst.inst.rs3 != 0;
+      end
+
+      // Issue instruction to Load Store Unit
+      if (!exec_mem_inst.valid) begin
+        foreach (entries[i]) begin
+          if (entries[i].valid && ready[i]) begin
+            if (entries[i].inst.opcode == `OPCODE_LOAD || entries[i].inst.opcode == `OPCODE_STORE) begin
+              $display("Executing memory instruction %h", entries[i].inst.pc);
+              exec_mem_inst.valid <= 1;
+              exec_mem_inst.collector_index_valid <= 1;
+              exec_mem_inst.collector_index <= i[1:0];
+              exec_mem_inst.inst <= entries[i].inst;
+              exec_mem_inst.src1 <= entries[i].rs_data1;
+              exec_mem_inst.src2 <= entries[i].rs_data2;
+              exec_mem_inst.src3 <= entries[i].rs_data3;
+              break;
+            end
+          end
+        end
+      end else if (exec_mem_inst.collector_index_valid) begin
+        entries[exec_mem_inst.collector_index].valid <= 0;
+        exec_mem_inst.collector_index_valid <= 0;
+      end
+
+      // Issue instruction to Compute Unit
+      if (!exec_compute_inst.valid) begin
+        foreach (entries[i]) begin
+          if (entries[i].valid && ready[i]) begin
+            if (entries[i].inst.opcode != `OPCODE_LOAD && entries[i].inst.opcode != `OPCODE_STORE &&
+                entries[i].inst.opcode != `OPCODE_TENSOR) begin
+              $display("Executing compute instruction %h", entries[i].inst.pc);
+              exec_compute_inst.valid <= 1;
+              exec_compute_inst.collector_index_valid <= 1;
+              exec_compute_inst.collector_index <= i[1:0];
+              exec_compute_inst.inst <= entries[i].inst;
+              exec_compute_inst.src1 <= entries[i].rs_data1;
+              exec_compute_inst.src2 <= entries[i].rs_data2;
+              exec_compute_inst.src3 <= entries[i].rs_data3;
+              break;
+            end
+          end
+        end
+      end else if (exec_compute_inst.collector_index_valid) begin
+        entries[exec_compute_inst.collector_index].valid <= 0;
+        exec_compute_inst.collector_index_valid <= 0;
+      end
+
+      // Fetch register
       case (status)
         GENERATE_REQUEST: begin
-          foreach (entries[i]) begin
-            request.entry_valid[i]   <= entries[i[1:0]+selected_entry].valid;
-            request.collector_num[i] <= i[1:0] + selected_entry;
-            request.reg_num[i][1] <= entries[i[1:0]+selected_entry].rs1;
-            request.reg_num[i][2] <= entries[i[1:0]+selected_entry].rs2;
-            request.reg_num[i][3] <= entries[i[1:0]+selected_entry].rs3;
-            request.reg_valid[i][0] <= 0;
-            request.reg_valid[i][1] <= entries[i[1:0]+selected_entry].rs_valid1;
-            request.reg_valid[i][2] <= entries[i[1:0]+selected_entry].rs_valid2;
-            request.reg_valid[i][3] <= entries[i[1:0]+selected_entry].rs_valid3;
+          if (active) begin
+            foreach (entries[i]) begin
+              request.entry_valid[i] <= entries[i[1:0]+selected_entry].valid;
+              request.collector_num[i] <= i[1:0] + selected_entry;
+              request.reg_num[i][1] <= entries[i[1:0]+selected_entry].rs1;
+              request.reg_num[i][2] <= entries[i[1:0]+selected_entry].rs2;
+              request.reg_num[i][3] <= entries[i[1:0]+selected_entry].rs3;
+              request.reg_valid[i][0] <= 0;
+              request.reg_valid[i][1] <= entries[i[1:0]+selected_entry].rs_valid1;
+              request.reg_valid[i][2] <= entries[i[1:0]+selected_entry].rs_valid2;
+              request.reg_valid[i][3] <= entries[i[1:0]+selected_entry].rs_valid3;
+            end
+            request.valid <= 1;
+            status <= WAIT_RESPONSE;
           end
-          request.valid <= 1;
-          status <= WAIT_RESPONSE;
         end
 
         WAIT_RESPONSE: begin
-          // Receive issued instruction
-          if (issued_inst.valid && !full) begin
-            $display("Received issued instruction %h", issued_inst.inst.pc);
-            issued_inst.valid <= 0;
-            entries[empty_slot] <= 1;
-            entries[empty_slot].inst <= issued_inst.inst;
-            entries[empty_slot].rs1 <= {
-              {issued_inst.inst.rs1[4:3] + issued_inst.inst.warp_num},
-              issued_inst.inst.rs1[2:0]
-            };
-            entries[empty_slot].rs2 <= {
-              {issued_inst.inst.rs2[4:3] + issued_inst.inst.warp_num},
-              issued_inst.inst.rs2[2:0]
-            };
-            entries[empty_slot].rs3 <= {
-              {issued_inst.inst.rs3[4:3] + issued_inst.inst.warp_num},
-              issued_inst.inst.rs3[2:0]
-            };
-            entries[empty_slot].rs_valid1 <= issued_inst.inst.rs1 != 0;
-            entries[empty_slot].rs_valid2 <= issued_inst.inst.rs2 != 0;
-            entries[empty_slot].rs_valid3 <= issued_inst.inst.rs3 != 0;
-          end
-
           // Catch response
           if (response.valid) begin
             response.valid <= 0;
@@ -129,36 +194,6 @@ module gelato_operand_collector (
               end
             end
             status <= GENERATE_REQUEST;
-          end
-
-          // Issue instruction to Load Store Unit
-          foreach (entries[i]) begin
-            if (entries[i].valid && ready[i]) begin
-              if (entries[i].inst.opcode == `OPCODE_LOAD || entries[i].inst.opcode == `OPCODE_STORE) begin
-                $display("Executing memory instruction %h", entries[i].inst.pc);
-                exec_mem_inst.valid <= 1;
-                exec_mem_inst.inst  <= entries[i].inst;
-                exec_mem_inst.src1  <= entries[i].rs_data1;
-                exec_mem_inst.src2  <= entries[i].rs_data2;
-                exec_mem_inst.src3  <= entries[i].rs_data3;
-                break;
-              end
-            end
-          end
-
-          // Issue instruction to Compute Unit
-          foreach (entries[i]) begin
-            if (entries[i].valid && ready[i]) begin
-              if (entries[i].inst.opcode != `OPCODE_LOAD && entries[i].inst.opcode != `OPCODE_STORE && entries[i].inst.opcode != `OPCODE_TENSOR) begin
-                $display("Executing compute instruction %h", entries[i].inst.pc);
-                exec_compute_inst.valid <= 1;
-                exec_compute_inst.inst  <= entries[i].inst;
-                exec_compute_inst.src1  <= entries[i].rs_data1;
-                exec_compute_inst.src2  <= entries[i].rs_data2;
-                exec_compute_inst.src3  <= entries[i].rs_data3;
-                break;
-              end
-            end
           end
         end
         default: begin

@@ -20,8 +20,8 @@
 `define NUM_INDEX 31:0
 
 // Instruction Buffer
-`define BUFFER_SIZE 4 // 4 instructions per warp
-`define BUFFER_SIZE_WIDTH 2
+`define BUFFER_SIZE 16 // 4 instructions per warp
+`define BUFFER_SIZE_WIDTH 4
 
 // Scoreboard
 `define SCOREBOARD_SIZE 4 // 4 regs per warp
