@@ -24,17 +24,35 @@ endinterface
 interface gelato_register_bank_update_if;
   import gelato_types::*;
 
-  logic write;
+  // Register read
   reg_num_t reg_num;
   warp_num_t warp_num;
-  warp_reg_t read_data;
+  warp_reg_t data;
+
+  // Register write
+  logic write;
+  thread_mask_t thread_mask;
   warp_reg_t write_data;
 
   // RF Arbiter -> Register bank
-  modport master(output write, output reg_num, output warp_num, input read_data, output write_data);
+  modport master(
+    output reg_num,
+    output warp_num,
+    input data,
+    output write,
+    output thread_mask,
+    output write_data
+  );
 
   // Register bank -> RF Arbiter
-  modport slave(input write, input reg_num, input warp_num, output read_data, input write_data);
+  modport slave(
+    input reg_num,
+    input warp_num,
+    output data,
+    input write,
+    input thread_mask,
+    input write_data
+  );
 endinterface
 
 interface gelato_register_collect_request_if;
