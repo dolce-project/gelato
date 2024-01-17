@@ -76,9 +76,9 @@ module gelato_operand_collector (
         entries[i].valid <= 0;
       end
     end else if (rdy) begin
-      $display("Operand collector");
-      $display("entry 0: valid = %b, pc = %h, ready = %b", entries[0].valid, entries[0].inst.pc, ready[0]);
-      $display("entry 1: valid = %b, pc = %h, ready = %b", entries[1].valid, entries[1].inst.pc, ready[1]);
+      // $display("Operand collector");
+      // $display("entry 0: valid = %b, pc = %h, ready = %b", entries[0].valid, entries[0].inst.pc, ready[0]);
+      // $display("entry 1: valid = %b, pc = %h, ready = %b", entries[1].valid, entries[1].inst.pc, ready[1]);
 
       // Receive issued instruction
       if (issued_inst.valid && !full) begin
@@ -102,29 +102,7 @@ module gelato_operand_collector (
         entries[empty_slot].rs_valid2 <= issued_inst.inst.rs2 != 0;
         entries[empty_slot].rs_valid3 <= issued_inst.inst.rs3 != 0;
       end
-
-      // Issue instruction to Load Store Unit
-      if (!exec_mem_inst.valid) begin
-        foreach (entries[i]) begin
-          if (entries[i].valid && ready[i]) begin
-            if (entries[i].inst.opcode == `OPCODE_LOAD || entries[i].inst.opcode == `OPCODE_STORE) begin
-              $display("Executing memory instruction %h", entries[i].inst.pc);
-              exec_mem_inst.valid <= 1;
-              exec_mem_inst.collector_index_valid <= 1;
-              exec_mem_inst.collector_index <= i[1:0];
-              exec_mem_inst.inst <= entries[i].inst;
-              exec_mem_inst.src1 <= entries[i].rs_data1;
-              exec_mem_inst.src2 <= entries[i].rs_data2;
-              exec_mem_inst.src3 <= entries[i].rs_data3;
-              break;
-            end
-          end
-        end
-      end else if (exec_mem_inst.collector_index_valid) begin
-        entries[exec_mem_inst.collector_index].valid <= 0;
-        exec_mem_inst.collector_index_valid <= 0;
-      end
-
+      
       // Issue instruction to Compute Unit
       if (!exec_compute_inst.valid) begin
         foreach (entries[i]) begin
@@ -146,6 +124,28 @@ module gelato_operand_collector (
       end else if (exec_compute_inst.collector_index_valid) begin
         entries[exec_compute_inst.collector_index].valid <= 0;
         exec_compute_inst.collector_index_valid <= 0;
+      end
+
+      // Issue instruction to Load Store Unit
+      if (!exec_mem_inst.valid) begin
+        foreach (entries[i]) begin
+          if (entries[i].valid && ready[i]) begin
+            if (entries[i].inst.opcode == `OPCODE_LOAD || entries[i].inst.opcode == `OPCODE_STORE) begin
+              $display("Executing memory instruction %h", entries[i].inst.pc);
+              exec_mem_inst.valid <= 1;
+              exec_mem_inst.collector_index_valid <= 1;
+              exec_mem_inst.collector_index <= i[1:0];
+              exec_mem_inst.inst <= entries[i].inst;
+              exec_mem_inst.src1 <= entries[i].rs_data1;
+              exec_mem_inst.src2 <= entries[i].rs_data2;
+              exec_mem_inst.src3 <= entries[i].rs_data3;
+              break;
+            end
+          end
+        end
+      end else if (exec_mem_inst.collector_index_valid) begin
+        entries[exec_mem_inst.collector_index].valid <= 0;
+        exec_mem_inst.collector_index_valid <= 0;
       end
 
       // Fetch register

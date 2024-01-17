@@ -8,6 +8,8 @@
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
+`define THREAD_REG_INDEX (i+1)*`DATA_WIDTH-1:i*`DATA_WIDTH
+
 module gelato_register_bank (
   input logic clk,
   input logic rst_n,
@@ -18,12 +20,24 @@ module gelato_register_bank (
   import gelato_types::*;
 
   warp_reg_t data[`WARP_NUM][`BANK_REG_NUM];
+  warp_reg_t write_data;
 
-  always_comb begin
-    if (update.write) begin
-      data[update.warp_num][update.reg_num[`BANK_REG_INDEX]] = update.write_data;
-    end else begin
-      update.read_data = data[update.warp_num][update.reg_num[`BANK_REG_INDEX]];
+  generate
+    for (genvar i = 0; i < `THREAD_NUM; i++) begin : gen_write_data
+      assign write_data[`THREAD_REG_INDEX] = update.thread_mask[i] ?
+                update.write_data[`THREAD_REG_INDEX] :
+                data[update.warp_num][update.reg_num[`BANK_REG_INDEX]][`THREAD_REG_INDEX];
+    end
+  endgenerate
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+    end else if (rdy) begin
+      if (update.write) begin
+        data[update.warp_num][update.reg_num[`BANK_REG_INDEX]] <= write_data;
+      end else begin
+        update.data <= data[update.warp_num][update.reg_num[`BANK_REG_INDEX]];
+      end
     end
   end
 endmodule

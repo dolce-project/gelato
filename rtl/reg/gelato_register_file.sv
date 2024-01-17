@@ -11,9 +11,10 @@ module gelato_register_file (
   input logic rdy,
 
   gelato_warpskd_collector_if.slave issued_inst,
-  gelato_exec_inst_if.master exec_mem_inst,
   gelato_exec_inst_if.master exec_compute_inst,
-  gelato_exec_inst_if.master exec_tensor_inst
+  gelato_exec_inst_if.master exec_mem_inst,
+  gelato_exec_inst_if.master exec_tensor_inst,
+  gelato_reg_wb_if.slave reg_wb
 );
 
   gelato_register_collect_request_if request;
@@ -40,7 +41,8 @@ module gelato_register_file (
 
     .update(update),
     .request(request),
-    .response(response)
+    .response(response),
+    .reg_wb(reg_wb)
   );
 
   gelato_register_bank_update_if bank_update[`BANK_NUM];
@@ -50,7 +52,9 @@ module gelato_register_file (
       assign bank_update[i].write = update.write[i];
       assign bank_update[i].reg_num = update.reg_num[i];
       assign bank_update[i].warp_num = update.warp_num[i];
-      assign bank_update[i].read_data = update.data[i];
+      assign update.data[i] = bank_update[i].data;
+      assign bank_update[i].thread_mask = update.thread_mask;
+      assign bank_update[i].write_data = update.write_data;
 
       gelato_register_bank register_bank (
         .clk(clk),

@@ -15,12 +15,14 @@ module gelato_register_file_arbiter (
 
   gelato_register_update_if.master update,
   gelato_register_collect_request_if.slave request,
-  gelato_register_collect_response_if.master response
+  gelato_register_collect_response_if.master response,
+  gelato_reg_wb_if.slave reg_wb
 );
   import gelato_types::*;
 
   typedef enum {
     IDLE,
+    WAIT_COLLECT,
     RESPONSE
   } status_t;
   status_t status;
@@ -52,6 +54,9 @@ module gelato_register_file_arbiter (
     end
   end
 
+  bank_num_t write_bank;
+  assign write_bank = reg_wb.reg_num[4:3] + reg_wb.warp_num;
+
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       response.valid <= 0;
@@ -59,12 +64,25 @@ module gelato_register_file_arbiter (
     end else begin
       case (status)
         IDLE: begin
-          if (request.valid) begin
-            request.valid <= 0;
-            update.reg_num <= reg_num;
-            update.warp_num <= warp_num;
-            status <= RESPONSE;
+          if (reg_wb.valid) begin
+            reg_wb.valid <= 0;
+            update.write[write_bank] <= 1;
+            update.reg_num[write_bank] <= reg_wb.reg_num;
+            update.warp_num[write_bank] <= reg_wb.warp_num;
+            update.thread_mask <= reg_wb.thread_mask;
+            update.write_data <= reg_wb.data;
+          end else begin
+            update.write[write_bank] <= 0;
+            if (request.valid) begin
+              request.valid <= 0;
+              update.reg_num <= reg_num;
+              update.warp_num <= warp_num;
+              status <= WAIT_COLLECT;
+            end
           end
+        end
+        WAIT_COLLECT: begin
+          status <= RESPONSE;
         end
         RESPONSE: begin
           response.valid <= 1;
