@@ -55,13 +55,23 @@ module gelato_compute_scheduler (
     end else begin
       case (status)
         IDLE: begin
-          if (exec_inst.valid) begin
+          if (exec_inst.valid && !reg_wb.valid) begin
             compute_task.valid <= 1;
             exec_inst.valid <= 0;
             status <= WAIT_COMPUTE;
           end
         end
         WAIT_COMPUTE: begin
+          if (compute_task.done) begin
+            $display("Finish executing instruction %h", exec_inst.inst.pc);
+            compute_task.valid <= 0;
+            reg_wb.valid <= 1;
+            reg_wb.data <= compute_task.rd;
+            reg_wb.warp_num <= exec_inst.inst.warp_num;
+            reg_wb.reg_num <= exec_inst.inst.rd;
+            reg_wb.thread_mask <= exec_inst.inst.thread_mask;
+            status <= IDLE;
+          end
         end
         default: begin
           $fatal(0, "CU: Invalid status");

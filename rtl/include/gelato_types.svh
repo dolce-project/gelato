@@ -94,6 +94,21 @@ package gelato_types;
     warp_reg_t rs_data1, rs_data2, rs_data3;
     logic rs_valid1, rs_valid2, rs_valid3;
   } collector_entry_t;
+
+  typedef enum { 
+    ADD, SUB, MUL, DIV, MOD, 
+    AND, OR, XOR, SHL, SHR, 
+    EQ, NE, LT, LE, GT, GE
+  } arith_oper_t;
+
+  typedef struct packed {
+    arith_oper_t op;
+
+    logic valid;
+    data_t rs1;
+    data_t rs2;
+    data_t rs3;
+  } alu_task_t;
 endpackage
 
 `endif

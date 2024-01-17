@@ -12,13 +12,12 @@ interface gelato_register_update_if;
   logic write[`BANK_NUM];
   reg_num_t reg_num[`BANK_NUM];
   warp_num_t warp_num[`BANK_NUM];
+  thread_mask_t thread_mask;
   warp_reg_t data[`BANK_NUM];
+  warp_reg_t write_data;
 
   // RF Arbiter -> Register bank
-  modport master(output write, output reg_num, output warp_num, inout data);
-
-  // Register bank -> RF Arbiter
-  modport slave(input write, input reg_num, input warp_num, inout data);
+  modport master(output write, output reg_num, output warp_num, output thread_mask, output data, output write_data);
 endinterface
 
 interface gelato_register_bank_update_if;
@@ -33,16 +32,6 @@ interface gelato_register_bank_update_if;
   logic write;
   thread_mask_t thread_mask;
   warp_reg_t write_data;
-
-  // RF Arbiter -> Register bank
-  modport master(
-    output reg_num,
-    output warp_num,
-    input data,
-    output write,
-    output thread_mask,
-    output write_data
-  );
 
   // Register bank -> RF Arbiter
   modport slave(

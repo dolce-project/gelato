@@ -26,7 +26,7 @@ module gelato_arith_logic_unit (
     end else begin
       case (status)
         IDLE: begin
-          if (compute_task.valid) begin
+          if (compute_task.valid && !compute_task.done) begin
             case (compute_task.op)
               ADD: begin
                 compute_task.rd <= compute_task.rs1 + compute_task.rs2;

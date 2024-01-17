@@ -31,11 +31,12 @@ module gelato (
     .rst_n(rst_n),
     .rdy(rdy),
     .inst_decoded_data(inst_decoded_data),
-    .issued_inst(issued_inst)
+    .issued_inst(issued_inst),
+    .reg_wb(reg_wb[0])
   );
 
-  gelato_exec_inst_if exec_mem_inst;
   gelato_exec_inst_if exec_compute_inst;
+  gelato_exec_inst_if exec_mem_inst;
   gelato_exec_inst_if exec_tensor_inst;
 
   gelato_register_file register_file (
@@ -43,8 +44,46 @@ module gelato (
     .rst_n(rst_n),
     .rdy(rdy),
     .issued_inst(issued_inst),
-    .exec_mem_inst(exec_mem_inst),
     .exec_compute_inst(exec_compute_inst),
-    .exec_tensor_inst(exec_tensor_inst)
+    .exec_mem_inst(exec_mem_inst),
+    .exec_tensor_inst(exec_tensor_inst),
+    .reg_wb(reg_wb[0])
   );
+
+  gelato_reg_wb_if reg_wb[3];
+  logic wb_valid[3];
+
+  gelato_compute compute_unit (
+    .clk(clk),
+    .rst_n(rst_n),
+    .rdy(rdy),
+    .exec_inst(exec_compute_inst),
+    .reg_wb(reg_wb[0])
+  );
+
+  logic [1:0] last_wb_signal, next_wb_signal;
+
+  always_comb begin
+    logic [1:0] i = last_wb_signal + 1;
+    repeat (3) begin
+      if (i == 3) begin
+        i = 0;
+      end
+      if (wb_valid[i]) begin
+        next_wb_signal = i;
+        break;
+      end
+      i++;
+    end
+  end
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      last_wb_signal <= 0;
+    end else begin
+      if (!wb_valid[last_wb_signal] && wb_valid[next_wb_signal]) begin
+        last_wb_signal <= next_wb_signal;
+      end
+    end
+  end
 endmodule

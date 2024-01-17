@@ -14,7 +14,8 @@ module gelato_dispatch (
   input logic rdy,
 
   gelato_idecode_ibuffer_if.slave inst_decoded_data,
-  gelato_warpskd_collector_if.master issued_inst
+  gelato_warpskd_collector_if.master issued_inst,
+  gelato_reg_wb_if.slave reg_wb
 );
   gelato_ibuffer_warpskd_if buffer;
   gelato_scoreboard_warpskd_if record;
@@ -33,7 +34,8 @@ module gelato_dispatch (
     .rst_n(rst_n),
     .rdy(rdy),
 
-    .record(record)
+    .record(record),
+    .reg_wb(reg_wb)
   );
 
   gelato_warp_scheduler warp_scheduler (

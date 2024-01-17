@@ -92,6 +92,17 @@
 `define OPCODE_NOOP   7'b0000000
 `define OPCODE_TENSOR 7'b0000000
 
+// ARITHI funct3
+`define FUNCT3_ADDI 3'b000
+`define FUNCT3_SLLI 3'b001
+`define FUNCT3_SLTI 3'b010
+`define FUNCT3_SLTIU 3'b011
+`define FUNCT3_XORI 3'b100
+`define FUNCT3_SRLI 3'b101
+`define FUNCT3_SRAI 3'b101
+`define FUNCT3_ORI  3'b110
+`define FUNCT3_ANDI 3'b111
+
 // Branch instructions with divergence
 `define FUNCT3_SEQ 3'b010
 `define FUNCT3_SNE 3'b011

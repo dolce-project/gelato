@@ -13,7 +13,8 @@ module gelato_scoreboard (
   input logic rst_n,
   input logic rdy,
 
-  gelato_scoreboard_warpskd_if.master record
+  gelato_scoreboard_warpskd_if.master record,
+  gelato_reg_wb_if.slave reg_wb
 );
   import gelato_types::*;
 
@@ -44,6 +45,13 @@ module gelato_scoreboard (
         dirty_regs[i][j] <= 0;
       end
     end else begin
+      if (reg_wb.valid) begin
+        foreach (dirty_regs[i,j]) begin
+          if (dirty_regs[i][j] == reg_wb.reg_num) begin
+            dirty_regs[i][j] <= 0;
+          end
+        end
+      end
       if (record.new_reg != 0) begin
         if (full[record.warp_num]) begin
           $fatal(0, "Scoreboard full!");
