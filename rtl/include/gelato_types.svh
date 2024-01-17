@@ -11,7 +11,6 @@
 `include "gelato_macros.svh"
 
 package gelato_types;
-
   typedef logic [`ADDR_INDEX] addr_t;
 
   typedef logic [`DATA_INDEX] data_t;
@@ -44,7 +43,7 @@ package gelato_types;
 
   typedef logic [`COLLECTOR_NUM_INDEX] collector_num_t;
 
-  typedef logic [`RS_NUM_INDEX] rs_num_t;
+  typedef logic [1:0] rs_num_t;
 
   typedef logic [(`THREAD_NUM*`DATA_WIDTH-1):0] warp_reg_t;
 
@@ -87,14 +86,13 @@ package gelato_types;
     inst_t inst;
   } inst_buffer_entry_t;
 
-  typedef struct {
+  typedef struct packed {
     logic valid;
-    logic ready;
     inst_t inst;
     
-    reg_num_t [`RS_INDEX] rs;
-    warp_reg_t [`RS_INDEX] rs_data;
-    logic [`RS_INDEX] rs_valid;
+    reg_num_t rs1, rs2, rs3;
+    warp_reg_t rs_data1, rs_data2, rs_data3;
+    logic rs_valid1, rs_valid2, rs_valid3;
   } collector_entry_t;
 endpackage
 

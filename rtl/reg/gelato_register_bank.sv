@@ -21,9 +21,9 @@ module gelato_register_bank (
 
   always_comb begin
     if (update.write) begin
-      data[update.reg_num[update.warp_num][`BANK_REG_INDEX]] = update.data;
+      data[update.warp_num][update.reg_num[`BANK_REG_INDEX]] = update.write_data;
     end else begin
-      update.data = data[update.warp_num][update.reg_num[`BANK_REG_INDEX]];
+      update.read_data = data[update.warp_num][update.reg_num[`BANK_REG_INDEX]];
     end
   end
 endmodule

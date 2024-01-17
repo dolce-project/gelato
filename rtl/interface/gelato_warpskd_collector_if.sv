@@ -9,12 +9,11 @@ interface gelato_warpskd_collector_if;
   import gelato_types::*;
 
   logic valid;
-  logic caught;
   inst_t inst;
 
   // Warp Scheduler -> Operand Collector
-  modport master(output valid, inout caught, output inst);
+  modport master(inout valid, output inst);
 
   // Operand Collector -> Warp Scheduler
-  modport slave(input valid, inout caught, input inst);
+  modport slave(inout valid, input inst);
 endinterface

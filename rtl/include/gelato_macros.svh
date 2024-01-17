@@ -110,8 +110,6 @@
 `define BANK_REG_NUM 8
 `define BANK_REG_WIDTH 3
 `define BANK_REG_INDEX 2:0
-`define RS_INDEX 1:3
-`define RS_NUM_INDEX 1:0
 
 `define FUNCT3_WIDTH 3
 `define FUNCT3_INDEX 2:0

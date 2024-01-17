@@ -11,9 +11,9 @@ module gelato_register_file (
   input logic rdy,
 
   gelato_warpskd_collector_if.slave issued_inst,
-  gelato_issue_inst_if.master issued_mem_inst,
-  gelato_issue_inst_if.master issued_compute_inst,
-  gelato_issue_inst_if.master issued_tensor_inst
+  gelato_exec_inst_if.master exec_mem_inst,
+  gelato_exec_inst_if.master exec_compute_inst,
+  gelato_exec_inst_if.master exec_tensor_inst
 );
 
   gelato_register_collect_request_if request;
@@ -28,9 +28,9 @@ module gelato_register_file (
     .issued_inst(issued_inst),
     .request(request),
     .response(response),
-    .issued_mem_inst(issued_mem_inst),
-    .issued_compute_inst(issued_compute_inst),
-    .issued_tensor_inst(issued_tensor_inst)
+    .exec_mem_inst(exec_mem_inst),
+    .exec_compute_inst(exec_compute_inst),
+    .exec_tensor_inst(exec_tensor_inst)
   );
 
   gelato_register_file_arbiter arbiter (
@@ -50,7 +50,7 @@ module gelato_register_file (
       assign bank_update[i].write = update.write[i];
       assign bank_update[i].reg_num = update.reg_num[i];
       assign bank_update[i].warp_num = update.warp_num[i];
-      assign bank_update[i].data = update.data[i];
+      assign bank_update[i].read_data = update.data[i];
 
       gelato_register_bank register_bank (
         .clk(clk),

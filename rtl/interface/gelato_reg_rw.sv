@@ -27,13 +27,14 @@ interface gelato_register_bank_update_if;
   logic write;
   reg_num_t reg_num;
   warp_num_t warp_num;
-  warp_reg_t data;
+  warp_reg_t read_data;
+  warp_reg_t write_data;
 
   // RF Arbiter -> Register bank
-  modport master(output write, output reg_num, output warp_num, inout data);
+  modport master(output write, output reg_num, output warp_num, input read_data, output write_data);
 
   // Register bank -> RF Arbiter
-  modport slave(input write, input reg_num, input warp_num, inout data);
+  modport slave(input write, input reg_num, input warp_num, output read_data, input write_data);
 endinterface
 
 interface gelato_register_collect_request_if;
@@ -42,9 +43,9 @@ interface gelato_register_collect_request_if;
   logic valid;
   logic entry_valid[`COLLECTOR_SIZE];
   warp_num_t warp_num[`COLLECTOR_SIZE];
-  reg_num_t reg_num[`COLLECTOR_SIZE][`RS_INDEX];
-  logic reg_valid[`COLLECTOR_SIZE][`RS_INDEX];
-  bank_num_t collector_num[`COLLECTOR_SIZE]; 
+  reg_num_t reg_num[`COLLECTOR_SIZE][4];
+  logic reg_valid[`COLLECTOR_SIZE][4];
+  bank_num_t collector_num[`COLLECTOR_SIZE];
 
   // Operand collector -> RF Arbiter
   modport master(

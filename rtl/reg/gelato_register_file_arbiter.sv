@@ -29,9 +29,10 @@ module gelato_register_file_arbiter (
   reg_num_t reg_num[`BANK_NUM];
   warp_num_t warp_num[`BANK_NUM];
   collector_num_t collector_index[`BANK_NUM];
+  rs_num_t reg_index[`BANK_NUM];
 
   // Request
-  logic reg_valid[`COLLECTOR_SIZE][`RS_INDEX];
+  logic reg_valid[`COLLECTOR_SIZE][4];
   assign reg_valid = request.reg_valid;
 
   always_comb begin
@@ -40,24 +41,20 @@ module gelato_register_file_arbiter (
         valid[i] = 0;
       end
       foreach (reg_valid[i, j]) begin
-        if (request.entry_valid[i] && request.reg_valid[i][j] && !valid[request.reg_num[i][j]][4:3]) begin
+        if (request.entry_valid[i] && request.reg_valid[i][j] && !valid[request.reg_num[i][j][4:3]]) begin
           valid[request.reg_num[i][j][4:3]] = 1;
           reg_num[request.reg_num[i][j][4:3]] = request.reg_num[i][j];
           warp_num[request.reg_num[i][j][4:3]] = request.warp_num[i];
-          collector_index[request.reg_num[i][j][4:3]] = {
-            request.collector_num[i], j
-          };
+          collector_index[request.reg_num[i][j][4:3]] = request.collector_num[i];
+          reg_index[request.reg_num[i][j][4:3]] = j[1:0];
         end
       end
     end
   end
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n) begin
       response.valid <= 0;
-      for (bank_num_t j = 0; j < `BANK_NUM; j++) begin
-        response.data_valid[j] <= 0;
-      end
     end else begin
       case (status)
         IDLE: begin
@@ -73,8 +70,8 @@ module gelato_register_file_arbiter (
           response.data_valid <= valid;
           response.data <= update.data;
           foreach (collector_index[i]) begin
-            response.collector_index[i] <= collector_index[3:2];
-            response.reg_index[i] <= collector_index[1:0];
+            response.collector_index[i] <= collector_index[i];
+            response.reg_index[i] <= reg_index[i];
           end
           status <= IDLE;
         end

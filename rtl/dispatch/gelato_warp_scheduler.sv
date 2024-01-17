@@ -22,7 +22,7 @@ module gelato_warp_scheduler (
 
   typedef enum {
     SELECT_INST,
-    WAIT_CAUGHT
+    ISSUE
   } status_t;
   status_t status;
 
@@ -85,34 +85,29 @@ module gelato_warp_scheduler (
     end else if (rdy) begin
       case (status)
         SELECT_INST: begin
-          if (valid[next_warp]) begin
+          if (!issued_inst.valid && valid[next_warp]) begin
             // Send the instruction to the collector
-            issued_inst.valid <= 1;
             issued_inst.inst  <= buffer.inst[next_warp];
 
-            $display("Issued instruction: %h, dirty regs: %d %d %d %d", buffer.inst[next_warp].pc,
-                     dirty_regs[next_warp][0], dirty_regs[next_warp][1], dirty_regs[next_warp][2],
+            $display("Issued instruction: %h, dirty regs: %d %d %d %d",
+                     buffer.inst[next_warp].pc, dirty_regs[next_warp][0],
+                     dirty_regs[next_warp][1], dirty_regs[next_warp][2],
                      dirty_regs[next_warp][3]);
 
             // Update status
-            status <= WAIT_CAUGHT;
+            status <= ISSUE;
           end
         end
-        WAIT_CAUGHT: begin
-          if (issued_inst.caught) begin
-            // Update scoreboard and buffer
-            record.new_reg <= issued_inst.inst.rd;
-            record.warp_num <= next_warp;
-            buffer.caught[next_warp] <= 1;
+        ISSUE: begin
+          // Update scoreboard and buffer
+          issued_inst.valid <= 1;
+          record.new_reg <= issued_inst.inst.rd;
+          record.warp_num <= next_warp;
+          buffer.caught[next_warp] <= 1;
 
-            // Update last warp number and status
-            last_warp <= next_warp;
-            status <= SELECT_INST;
-
-            // Clear output
-            issued_inst.caught <= 0;
-            issued_inst.valid <= 0;
-          end
+          // Update last warp number and status
+          last_warp <= next_warp;
+          status <= SELECT_INST;
         end
         default: begin
           $fatal(0, "gelato_warp_scheduler: Invalid status");
