@@ -81,7 +81,6 @@ module gelato (
     .rst_n(rst_n),
     .rdy(rdy),
     .exec_inst(exec_tensor_inst),
-    .ram(data_ram),
     .reg_wb(reg_wb[2])
   );
 
