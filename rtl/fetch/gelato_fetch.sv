@@ -10,7 +10,7 @@ module gelato_fetch (
   input logic rst_n,
   input logic rdy,
 
-  gelato_init_if.slave init,
+  gelato_init_warp_if.slave init,
   gelato_idecode_ibuffer_if.master inst_decoded_data,
   gelato_ram_if.master fetch_data,
   gelato_ibuffer_fetchskd_if.slave buffer_status

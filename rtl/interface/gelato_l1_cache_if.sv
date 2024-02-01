@@ -17,8 +17,8 @@ interface gelato_l1_cache_if;
   data_t data;
 
   // I-Cache
-  modport master(input valid, input addr, output done, output data);
+  modport master(inout valid, input addr, output done, output data);
 
   // I-Fetch
-  modport slave(output valid, output addr, input done, input data);
+  modport slave(inout valid, output addr, input done, input data);
 endinterface

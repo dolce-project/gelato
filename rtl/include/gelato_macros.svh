@@ -13,6 +13,9 @@
 `define ADDR_WIDTH 32 // 32-bit address width
 `define ADDR_INDEX 31:0
 
+`define BYTE_WIDTH 8
+`define BYTE_INDEX 7:0
+
 `define DATA_WIDTH 32 // 32-bit data width
 `define DATA_INDEX 31:0
 
@@ -37,7 +40,7 @@
 
 // Cache configuration
 // L1 Cache
-`define L1_CACHE_LINE_SIZE 32 // 32 B per line
+`define L1_CACHE_LINE_SIZE 32 // 32 Byte per line
 `define L1_CACHE_LINE_WIDTH 5
 
 `define L1_CACHE_ADDR_WIDTH 27 // 27-bit address width
@@ -59,11 +62,16 @@
 
 `define L1_DCACHE_SIZE 8192 // 8 KB L1 D-Cache (2-way set-associative)
 
+`define L2-CACHE_
+
 `define WARP_NUM_WIDTH 2
 `define WARP_NUM_INDEX 1:0
 `define WARP_NUM 4
 `define WARP_MAX_NUM 3
 `define WARP_INDEX 3:0
+
+`define SM_NUM 4
+`define SM_NUM_WIDTH 2
 
 `define THREAD_NUM_WIDTH 5
 `define THREAD_NUM_INDEX 4:0
@@ -89,7 +97,7 @@
 `define OPCODE_STORE  7'b0100011
 `define OPCODE_ARITHI 7'b0010011
 `define OPCODE_ARITH  7'b0110011
-`define OPCODE_NOOP   7'b0000000
+`define OPCODE_NOP   7'b0000000
 
 // ARITHI funct3
 `define FUNCT3_ADDI 3'b000
@@ -103,8 +111,8 @@
 `define FUNCT3_ANDI 3'b111
 
 // Branch instructions with divergence
-`define FUNCT3_SEQ 3'b010
-`define FUNCT3_SNE 3'b011
+`define FUNCT3_BEQD 3'b010
+`define FUNCT3_BNED 3'b011
 
 // Special operations
 `define OPCODE_MARITH 7'b1010111

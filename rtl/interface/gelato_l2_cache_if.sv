@@ -14,11 +14,17 @@ interface gelato_l2_cache_if;
 
   // L2 Cache -> L1 Cache
   logic done;
-  data_t data;
+  l1_cache_line_t data;
 
   // L2 Cache
   modport master(input valid, input addr, output done, output data);
 
   // L1 Cache
   modport slave(input valid, output addr, input done, input data);
+endinterface
+
+interface gelato_l2_cache_joint_if;
+  import gelato_types::*;
+
+  logic valid[
 endinterface

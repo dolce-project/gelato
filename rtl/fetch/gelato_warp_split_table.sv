@@ -8,14 +8,16 @@
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
-module gelato_warp_split_table (
+module gelato_warp_split_table #(
+  parameter int CURRENT_WARP_NUM = 0
+) (
   input logic clk,
   input logic rst_n,
   input logic rdy,
 
   gelato_split_table_select_pc_if.master select,
   gelato_split_table_update_pc_if.slave  update,
-  gelato_init_if.slave    init
+  gelato_init_warp_if.slave    init
 );
   import gelato_types::*;
 
@@ -51,10 +53,12 @@ module gelato_warp_split_table (
         split_table[0].active <= 1;
         split_table[0].current_pc <= init.pc;
         split_table[0].thread_mask <= {`THREAD_NUM{1'b1}};
-        // split_table_num_t i = 0;
-        // repeat (`SPLIT_TABLE_NUM - 1) begin
-        //   split_table[++i].valid <= 0;
-        // end
+        for (int i = 1; i < `SPLIT_TABLE_NUM; i++) begin
+          split_table[i].valid <= 0;
+          split_table[i].active <= 0;
+          split_table[i].current_pc <= 0;
+          split_table[i].thread_mask <= 0;
+        end
       end
     end else if (rdy) begin
       // Update the pc table entry

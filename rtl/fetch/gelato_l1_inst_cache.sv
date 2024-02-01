@@ -14,36 +14,63 @@ module gelato_l1_inst_cache (
   input logic rdy,
 
   // From the instruction fetch unit
-  gelato_l1_cache_if.master inst_cache_request,
+  gelato_l1_cache_if.master inst_request,
 
-  // To RAM
-  gelato_ram_if.master fetch_data
+  // To L2 Cache
+  gelato_l2_cache_if.master fetch_data
 );
   import gelato_types::*;
 
-  // logic hit;
-  // l1_cache_entry_t cache[`L1_ICACHE_LINE_NUM];
-  // l1_cache_index_t index;
-  // l1_cache_tag_t tag;
-  // l1_cache_offset_t offset;
+  typedef enum { IDLE, WAIT_MEM } status_t;
+  status_t status;
 
-  // assign index = inst_cache_request.addr[`L1_CACHE_INDEX_INDEX];
-  // assign tag = inst_cache_request.addr[`L1_CACHE_INDEX_TAG];
-  // assign offset = inst_cache_request.addr[`L1_CACHE_OFFSET_INDEX];
+  logic hit;
+  l1_cache_entry_t cache[`L1_ICACHE_LINE_NUM];
+  l1_cache_index_t index;
+  l1_cache_tag_t tag;
+  l1_cache_offset_t offset;
 
-  // always_comb begin
-  //   if (inst_cache_request.valid) begin
-  //     hit = cache[index].valid && (cache[index].tag == tag);
-  //     if (hit) begin
-  //       fetch_data.done = 1;
-  //       fetch_data.data = cache[index].data;
-  //     end
-  //   end
-  // end
+  assign hit = cache[index].valid && cache[index].tag == tag;
+  assign index = inst_request.addr[`L1_CACHE_INDEX_INDEX];
+  assign tag = inst_request.addr[`L1_CACHE_TAG_INDEX];
+  assign offset = inst_request.addr[`L1_CACHE_OFFSET_INDEX];
 
-  assign fetch_data.valid = inst_cache_request.valid;
-  assign fetch_data.addr = inst_cache_request.addr;
-  assign inst_cache_request.done = fetch_data.done;
-  assign inst_cache_request.data = fetch_data.data;
-
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      // cache <= '{default:0};
+    end else begin
+      case (status)
+        IDLE: begin
+          if (inst_request.valid) begin
+            if (hit) begin // done
+              inst_request.valid <= 0;
+              inst_request.done <= 1;
+              inst_request.data <= {cache[index].data[offset + 3], cache[index].data[offset + 2], cache[index].data[offset + 1], cache[index].data[offset]};
+            end else begin // wait for memory
+              inst_request.done <= 0;
+              inst_request.data <= 0;
+              fetch_data.valid <= 1;
+              fetch_data.addr <= inst_request.addr;
+              status <= WAIT_MEM;
+            end
+          end
+        end
+        WAIT_MEM: begin
+          if (fetch_data.done) begin
+            cache[index].valid <= 1;
+            cache[index].tag <= tag;
+            cache[index].data <= fetch_data.data;
+            inst_request.valid <= 0;
+            inst_request.done <= 1;
+            inst_request.data <= {fetch_data.data[offset + 3], fetch_data.data[offset + 2], fetch_data.data[offset + 1], fetch_data.data[offset]};
+            fetch_data.valid <= 0;
+            status <= IDLE;
+          end
+        end
+        default: begin
+          $fatal(0, "gelato_l1_inst_cache: Invalid status");
+        end
+      endcase
+    end
+  end
 endmodule
