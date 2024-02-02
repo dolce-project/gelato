@@ -38,8 +38,8 @@ interface gelato_init_warp_if;
   modport slave_split_table(input valid, input pc, input workers);
 
   // SM Controller -> RF Arbiter
-  modport master_rf_arbiter(output valid, output pc, output gridDim, output blockDim, output blockIdx);
+  modport master_rf_arbiter(output valid, output gridDim, output blockDim, output blockIdx);
 
   // RF Arbiter -> SM Controller
-  modport slave_rf_arbiter(input valid, input pc, input gridDim, input blockDim, input blockIdx);
+  modport slave_rf_arbiter(input valid, input gridDim, input blockDim, input blockIdx);
 endinterface
