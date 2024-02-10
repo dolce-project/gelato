@@ -13,7 +13,7 @@ module gelato_split_table (
   input logic rst_n,
   input logic rdy,
 
-  gelato_init_if.slave init,
+  gelato_init_warp_if.slave_split_table init,
 
   gelato_pctable_fetchskd_if.master pc_table,
   gelato_idecode_split_if.slave split_data
@@ -22,7 +22,7 @@ module gelato_split_table (
 
   gelato_split_table_select_pc_if select[`WARP_NUM];
   gelato_split_table_update_pc_if update[`WARP_NUM];
-  gelato_init_if warp_init[`WARP_NUM];
+  gelato_init_warp_if warp_init[`WARP_NUM];
   warp_num_t warp_num[`WARP_NUM];
 
   logic init_all_warp;

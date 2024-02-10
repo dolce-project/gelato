@@ -17,7 +17,7 @@ module gelato_warp_split_table #(
 
   gelato_split_table_select_pc_if.master select,
   gelato_split_table_update_pc_if.slave  update,
-  gelato_init_warp_if.slave    init
+  gelato_init_warp_if.slave_split_table  init
 );
   import gelato_types::*;
 

@@ -11,25 +11,23 @@ module top (
   input logic rdy,
   input logic init_rdy
 );
-  gelato_ram_if ram;
-  gelato_init_if init;
+  gelato_ram_if ram_if;
+  gelato_init_warp_if init_if;
 
-  assign init.valid = init_rdy;
-  assign init.pc = 0;
-  assign init.workers = `THREAD_NUM;
+  assign init_if.valid = init_rdy;
+  assign init_if.pc = 0;
+  assign init_if.workers = `THREAD_NUM;
 
-  gelato gelato (
+  gelato gpu (
     .clk(clk),
     .rst_n(rst_n),
-    .rdy(rdy),
-    .init(init),
-    .ram(ram)
+    .rdy(rdy)
   );
 
-  fake_ram fake_ram (
+  fake_ram ram (
     .clk(clk),
     .rst_n(rst_n),
     .rdy(rdy),
-    .ram(ram)
+    .ram(ram_if)
   );
 endmodule

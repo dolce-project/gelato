@@ -14,7 +14,7 @@ module gelato_load_store (
   input logic rdy,
 
   gelato_exec_inst_if.slave exec_inst,
-  gelato_ram_if.master ram,
+  gelato_l2_cache_if.slave mem_data,
   gelato_reg_wb_if.master reg_wb
 );
   import gelato_types::*;
@@ -68,21 +68,21 @@ module gelato_load_store (
             if (addr[thread_count] == 0) begin
               thread_count <= thread_count + 1;
             end else if (exec_inst.inst.opcode == `OPCODE_LOAD) begin
-              ram.valid <= 1;
-              ram.write <= 0;
-              ram.addr  <= addr[thread_count];
+              mem_data.valid <= 1;
+              mem_data.write <= 0;
+              mem_data.addr  <= addr[thread_count];
             end else if (exec_inst.inst.opcode == `OPCODE_STORE) begin
-              ram.valid <= 1;
-              ram.write <= 1;
-              ram.addr  <= addr[thread_count];
-              ram.data  <= write_data[thread_count];
+              mem_data.valid <= 1;
+              mem_data.write <= 1;
+              mem_data.addr  <= addr[thread_count];
+              mem_data.data  <= write_data[thread_count];
             end
           end
         end
         WAIT_MEM: begin
-          if (ram.done) begin
+          if (mem_data.done) begin
             if (exec_inst.inst.opcode == `OPCODE_LOAD) begin
-              load_data[thread_count] <= ram.data;
+              load_data[thread_count] <= mem_data.data;
             end
             thread_count <= thread_count + 1;
             status <= MEM;

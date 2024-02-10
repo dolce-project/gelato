@@ -10,9 +10,9 @@ module gelato_fetch (
   input logic rst_n,
   input logic rdy,
 
-  gelato_init_warp_if.slave init,
+  gelato_init_warp_if.slave_split_table init,
   gelato_idecode_ibuffer_if.master inst_decoded_data,
-  gelato_ram_if.master fetch_data,
+  gelato_l2_cache_if.master fetch_data,
   gelato_ibuffer_fetchskd_if.slave buffer_status
 );
   gelato_fetchskd_ifetch_if inst_pc;
@@ -46,7 +46,7 @@ module gelato_fetch (
     .rst_n(rst_n),
     .rdy(rdy),
 
-    .inst_cache_request(inst_cache_request),
+    .inst_request(inst_cache_request),
     .fetch_data(fetch_data)
   );
 

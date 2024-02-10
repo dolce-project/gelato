@@ -20,7 +20,11 @@ module gelato_inst_fetch (
   gelato_ifetch_idecode_if.master inst_raw_data
 );
 
-  typedef enum { IDLE, WAIT_MEM } status_t;
+  typedef enum {
+    IDLE,
+    WAIT_MEM,
+    WAIT_CAUGHT
+  } status_t;
   status_t status;
 
   always_ff @(posedge clk or negedge rst_n) begin
@@ -49,11 +53,22 @@ module gelato_inst_fetch (
         end
         WAIT_MEM: begin
           if (inst_cache_request.valid) begin
-            // Send the raw data to the I-Buffer
+            if (!inst_raw_data.valid) begin // The previous instruction has already been caught
+              // Send the raw data to the I-Buffer
+              inst_raw_data.valid <= 1;
+              inst_raw_data.inst <= inst_cache_request.data;
+
+              // Update status
+              status <= IDLE;
+            end else begin
+              status <= WAIT_CAUGHT;
+            end
+          end
+        end
+        WAIT_CAUGHT: begin
+          if (!inst_raw_data.valid) begin // Same as above
             inst_raw_data.valid <= 1;
             inst_raw_data.inst <= inst_cache_request.data;
-
-            // Update status
             status <= IDLE;
           end
         end

@@ -13,6 +13,8 @@
 package gelato_types;
   typedef logic [`ADDR_INDEX] addr_t;
 
+  typedef logic [`BYTE_INDEX] byte_t;
+
   typedef logic [`DATA_INDEX] data_t;
 
   typedef logic [`NUM_INDEX] num_t;
@@ -29,7 +31,7 @@ package gelato_types;
 
   typedef logic [`L1_CACHE_OFFSET_INDEX] l1_cache_offset_t;
 
-  typedef logic [`L1_CACHE_LINE_SIZE-1:0] l1_cache_line_t;
+  typedef byte_t [`L1_CACHE_LINE_SIZE-1:0] l1_cache_line_t;
 
   typedef logic [`WARP_NUM_INDEX] warp_num_t;
 
@@ -46,6 +48,12 @@ package gelato_types;
   typedef logic [1:0] rs_num_t;
 
   typedef logic [(`THREAD_NUM*`DATA_WIDTH-1):0] warp_reg_t;
+
+  typedef struct packed {
+    integer x;
+    integer y;
+    integer z;
+  } int3_t;
 
   typedef struct packed {
     opcode_t opcode;

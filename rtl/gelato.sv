@@ -3,110 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
-// Top module of the Gelato GPU
+// Top level module of the Gelato GPU
 
 module gelato (
   input logic clk,
   input logic rst_n,
-  input logic rdy,
-
-  gelato_init_if.slave init,
-  gelato_ram_if.slave ram
+  input logic rdy
 );
-  gelato_idecode_ibuffer_if inst_decoded_data;
-  gelato_ibuffer_fetchskd_if buffer_status;
+  gelato_init_sm_if init[`SM_NUM];
+  gelato_l2_cache_if inst_cache_request[`SM_NUM];
+  gelato_l2_cache_if data_cache_request[`SM_NUM];
 
-  gelato_ram_if inst_ram;
-  gelato_ram_if data_ram;
-
-  gelato_fetch fetch_unit (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .init(init),
-    .inst_decoded_data(inst_decoded_data),
-    .fetch_data(ram),
-    .buffer_status(buffer_status)
-  );
-
-  gelato_warpskd_collector_if issued_inst;
-
-  gelato_dispatch dispatch_unit (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .inst_decoded_data(inst_decoded_data),
-    .issued_inst(issued_inst),
-    .buffer_status(buffer_status),
-    .reg_wb(reg_wb[0])
-  );
-
-  gelato_exec_inst_if exec_compute_inst;
-  gelato_exec_inst_if exec_mem_inst;
-  gelato_exec_inst_if exec_tensor_inst;
-
-  gelato_register_file register_file (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .issued_inst(issued_inst),
-    .exec_compute_inst(exec_compute_inst),
-    .exec_mem_inst(exec_mem_inst),
-    .exec_tensor_inst(exec_tensor_inst),
-    .reg_wb(reg_wb[0])
-  );
-
-  gelato_reg_wb_if reg_wb[3];
-  logic wb_valid[3];
-
-  gelato_compute compute_unit (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .exec_inst(exec_compute_inst),
-    .reg_wb(reg_wb[0])
-  );
-
-  gelato_load_store load_store_unit (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .exec_inst(exec_mem_inst),
-    .ram(data_ram),
-    .reg_wb(reg_wb[1])
-  );
-
-  gelato_tensor tensor_unit (
-    .clk(clk),
-    .rst_n(rst_n),
-    .rdy(rdy),
-    .exec_inst(exec_tensor_inst),
-    .reg_wb(reg_wb[2])
-  );
-
-  logic [1:0] last_wb_signal, next_wb_signal;
-
-  always_comb begin
-    logic [1:0] i = last_wb_signal + 1;
-    repeat (3) begin
-      if (i == 3) begin
-        i = 0;
-      end
-      if (wb_valid[i]) begin
-        next_wb_signal = i;
-        break;
-      end
-      i++;
+  generate;
+    for (genvar i = 0; i < `SM_NUM; i++) begin: gen_sm
+      gelato_sm sm (
+        .clk(clk),
+        .rst_n(rst_n),
+        .rdy(rdy),
+        .init_sm(init),
+        .inst_cache_request(inst_cache_request),
+        .data_cache_request(data_cache_request)
+      );
     end
-  end
-
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-      last_wb_signal <= 0;
-    end else begin
-      if (!wb_valid[last_wb_signal] && wb_valid[next_wb_signal]) begin
-        last_wb_signal <= next_wb_signal;
-      end
-    end
-  end
+  endgenerate
 endmodule

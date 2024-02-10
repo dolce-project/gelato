@@ -3,9 +3,7 @@
 #include <fstream>
 #include <verilated_vcd_c.h>
 
-#include <iostream>
-
-const int kMaxSimTime = 20000;
+const int kMaxSimTime = 200;
 
 double sc_time_stamp() { return 0; }
 
@@ -41,8 +39,12 @@ int main(int argc, char **argv, char **env) {
   InitRam(top);
 
   int sim_time = 0;
+  int clock_cycle = 0;
   while (sim_time < kMaxSimTime) {
     top->clk = !top->clk;
+    if (top->clk == 1) {
+      printf("clock cycle: %d\n", clock_cycle++);
+    }
     top->init_rdy = 1;
     if (sim_time < 4) {
       top->rdy = 0;
