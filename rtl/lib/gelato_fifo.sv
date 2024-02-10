@@ -26,7 +26,7 @@ module gelato_fifo #(
   // Write counter
   //=========================================================================
 
-  logic [`WIDTH-1:0] wr_ptr_d, wr_ptr_q;
+  logic [WIDTH-1:0] wr_ptr_d, wr_ptr_q;
   logic wr_en;
   assign wr_en = din_valid && din_ready;
   assign wr_ptr_d = wr_en ? wr_ptr_q + 1 : wr_ptr_q;
@@ -42,7 +42,7 @@ module gelato_fifo #(
   //=========================================================================
   // Read counter
   //=========================================================================
-  logic [`WIDTH-1:0] rd_ptr_d, rd_ptr_q;
+  logic [WIDTH-1:0] rd_ptr_d, rd_ptr_q;
   logic rd_en;
   assign rd_en = dout_valid && dout_ready;
   assign rd_ptr_d = rd_en ? rd_ptr_q + 1 : rd_ptr_q;
@@ -59,16 +59,15 @@ module gelato_fifo #(
   // FIFO memory and output logic
   //=========================================================================
   T mem[DEPTH];
-  assign dout = mem[rd_ptr];
-  assign cnt_d = wr_ptr - rd_ptr;
+  logic [WIDTH-1:0] cnt_d;
+  assign dout = mem[rd_ptr_q];
 
-  logic din_ready_en, din_ready_d, din_ready_q;
-  assign din_ready_en = din_ready || (dout_valid && dout_ready);
-  assign din_read_d = cnt_d < DEPTH - 1;
+  assign cnt_d = wr_ptr_d - rd_ptr_d;
+  logic din_ready_d, din_ready_q;
+  assign din_ready_d = cnt_d != {WIDTH{1'b1}};
   assign din_ready = din_ready_q;
 
-  logic dout_valid_en, dout_valid_d, dout_valid_q;
-  assign dout_valid_en = dout_valid || (din_valid && din_ready);
+  logic dout_valid_d, dout_valid_q;
   assign dout_valid_d = cnt_d > 0;
   assign dout_valid = dout_valid_q;
 
@@ -77,13 +76,21 @@ module gelato_fifo #(
       mem <= '{default:0};
     end else begin
       if (wr_en) begin
-        mem[wr_ptr] <= din;
+        mem[wr_ptr_q] <= din;
       end
-      if (din_ready_en) begin
-        din_ready_q <= din_ready_d;
-      end
-      if (dout_valid_en) begin
-        dout_valid_q <= dout_valid_d;
+      din_ready_q <= din_ready_d;
+      dout_valid_q <= dout_valid_d;
+    end
+  end
+  
+  //=========================================================================
+  // Debug
+  //=========================================================================
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (rst_n) begin
+      $display("din_valid=%0d, din=%0d, din_ready=%0d, dout_valid=%0d, dout=%0d, dout_ready=%0d", din_valid, din, din_ready, dout_valid, dout, dout_ready);
+      for (int i = 0; i < DEPTH; i++) begin
+        $display("mem[%0d]=%0d", i, mem[i]);
       end
     end
   end
