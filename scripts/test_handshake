@@ -3,7 +3,7 @@ HOME_DIR=$(cd "$(dirname "$0")"/..;pwd)
 cd $HOME_DIR
 echo "Start building simulation environment..."
 rm -rf obj_dir
-verilator --trace --cc --exe --build -j --top-module top rtl/lib/gelato_fifo.sv rtl/test/fifo/top.sv rtl/test/test_with_clk_and_rst.cpp >/dev/null
+verilator --trace --cc --exe --build -j --top-module top rtl/lib/gelato_handshake.sv rtl/lib/gelato_fifo.sv rtl/test/handshake/top.sv rtl/test/test_with_clk_and_rst.cpp >/dev/null
 if [ $? -eq 0 ]; then
   echo "Build successfully!"
 else

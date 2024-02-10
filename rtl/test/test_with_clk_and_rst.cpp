@@ -1,9 +1,9 @@
+
 #include "Vtop.h"
 
 #include <verilated_vcd_c.h>
 
-const int kMaxSimTime = 20;
-
+const int kMaxSimTime = 200;
 
 int main(int argc, char **argv, char **env) {
   Vtop *top = new Vtop;

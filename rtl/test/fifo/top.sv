@@ -27,7 +27,7 @@ module top (
     .dout_valid(dout_valid),
     .dout(dout),
     .dout_ready(dout_ready)
-  );  
+  );
   always_comb begin
     case (count)
       1: begin
@@ -53,7 +53,7 @@ module top (
         din = 5;
       end
       default: begin
-      end 
+      end
     endcase
   end
 
@@ -61,7 +61,9 @@ module top (
     if (!rst_n) begin
       count <= 0;
     end else begin
-      // $display("din_valid=%0d, din=%0d, din_ready=%0d, dout_valid=%0d, dout=%0d, dout_ready=%0d", din_valid, din, din_ready, dout_valid, dout, dout_ready);
+      $display(
+        "din_valid=%0d, din=%0d, din_ready=%0d, dout_valid=%0d, dout=%0d, dout_ready=%0d",
+        din_valid, din, din_ready, dout_valid, dout, dout_ready);
       count <= count + 1;
     end
   end

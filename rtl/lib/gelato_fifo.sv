@@ -82,16 +82,4 @@ module gelato_fifo #(
       dout_valid_q <= dout_valid_d;
     end
   end
-  
-  //=========================================================================
-  // Debug
-  //=========================================================================
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (rst_n) begin
-      $display("din_valid=%0d, din=%0d, din_ready=%0d, dout_valid=%0d, dout=%0d, dout_ready=%0d", din_valid, din, din_ready, dout_valid, dout, dout_ready);
-      for (int i = 0; i < DEPTH; i++) begin
-        $display("mem[%0d]=%0d", i, mem[i]);
-      end
-    end
-  end
 endmodule
