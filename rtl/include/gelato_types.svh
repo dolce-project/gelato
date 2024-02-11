@@ -11,6 +11,7 @@
 `include "gelato_macros.svh"
 
 package gelato_types;
+  // Basic types
   typedef logic [`ADDR_INDEX] addr_t;
 
   typedef logic [`BYTE_INDEX] byte_t;
@@ -23,6 +24,21 @@ package gelato_types;
 
   typedef logic [`REG_NUM_INDEX] reg_num_t;
 
+  typedef logic [`WARP_NUM_INDEX] warp_num_t;
+
+  typedef logic [`THREAD_NUM_INDEX] thread_num_t;
+
+  typedef logic [`THREAD_INDEX] thread_mask_t;
+
+  typedef logic [`SPLIT_TABLE_NUM_INDEX] split_table_num_t;
+
+  // Types for frontend
+  typedef struct packed {
+    addr_t pc;
+    warp_num_t warp_num;
+    split_table_num_t split_table;
+  } pc_info_t;
+
   typedef logic [`L1_CACHE_ADDR_INDEX] l1_cache_addr_t;
 
   typedef logic [`L1_CACHE_INDEX_INDEX] l1_cache_index_t;
@@ -32,14 +48,6 @@ package gelato_types;
   typedef logic [`L1_CACHE_OFFSET_INDEX] l1_cache_offset_t;
 
   typedef byte_t [`L1_CACHE_LINE_SIZE-1:0] l1_cache_line_t;
-
-  typedef logic [`WARP_NUM_INDEX] warp_num_t;
-
-  typedef logic [`THREAD_NUM_INDEX] thread_num_t;
-
-  typedef logic [`THREAD_INDEX] thread_mask_t;
-
-  typedef logic [`SPLIT_TABLE_NUM_INDEX] split_table_num_t;
 
   typedef logic [`BANK_NUM_INDEX] bank_num_t;
 
