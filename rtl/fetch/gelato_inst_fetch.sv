@@ -5,75 +5,94 @@
 
 // This file contains the implementation of the instruction fetch unit of the Gelato GPU.
 
+`include "gelato_macros.svh"
+`include "gelato_types.svh"
+
+import gelato_types::*;
+
 module gelato_inst_fetch (
   input logic clk,
   input logic rst_n,
   input logic rdy,
 
-  // PC-Table <-> I-Cache
-  gelato_fetchskd_ifetch_if.slave inst_pc,
-
   // I-Cache <-> I-Fetch
-  gelato_l1_cache_if.slave inst_cache_request,
+  gelato_l1_icache_if.slave icache_if,
 
-  // I-Fetch <-> I-Buffer
-  gelato_ifetch_idecode_if.master inst_raw_data
+  // Get the next pc from fetch scheduler
+  input logic din_valid,
+  output logic din_ready,
+  input pc_info_t din,
+
+  // Send the fetched instruction raw data to idecode
+  output logic dout_valid,
+  input logic dout_ready,
+  output inst_raw_data_t dout
 );
-
-  typedef enum {
+  //============================================================================
+  // Transition of state
+  //============================================================================
+  typedef enum logic [1:0] {
     IDLE,
     WAIT_MEM,
-    WAIT_CAUGHT
-  } status_t;
-  status_t status;
+    WAIT_READY
+  } state_t;
+  state_t state_q, state_d;
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-      status <= IDLE;
+      state_q <= IDLE;
     end else if (rdy) begin
-      case (status)
+      state_q <= state_d;
+    end
+  end
+
+  //============================================================================
+  // Condition of state transition
+  //============================================================================
+  always_comb begin
+    case (state_q)
+      IDLE: begin
+        state_d = din_valid ? WAIT_MEM : IDLE;
+      end
+      WAIT_MEM: begin
+        state_d = icache_if.ready ? WAIT_READY : WAIT_MEM;
+      end
+      WAIT_READY: begin
+        state_d = dout_ready ? IDLE : WAIT_READY;
+      end
+      default: begin
+        $fatal(0, "gelato_inst_fetch: Invalid state");
+      end
+    endcase
+  end
+
+  //============================================================================
+  // Output
+  //============================================================================
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      dout_valid <= 0;
+    end else if (rdy) begin
+      case (state_q)
         IDLE: begin
-          if (inst_pc.valid) begin
-            // Caught
-            inst_pc.caught <= 1;
-
-            // Initialize the raw data
-            inst_raw_data.valid <= 0;
-            inst_raw_data.pc <= inst_pc.pc;
-            inst_raw_data.warp_num <= inst_pc.warp_num;
-            inst_raw_data.split_table_num <= inst_pc.split_table_num;
-
-            // Send the request to the I-Cache
-            inst_cache_request.valid <= 1;
-            inst_cache_request.addr <= inst_pc.pc;
-
-            // Update status
-            status <= WAIT_MEM;
-          end
+          dout_valid <= 0;
+          dout_ready <= 1;
+          dout.pc <= din.pc;
+          dout.warp_num <= din.warp_num;
+          dout.split_table_num <= din.split_table_num;
         end
         WAIT_MEM: begin
-          if (inst_cache_request.valid) begin
-            if (!inst_raw_data.valid) begin // The previous instruction has already been caught
-              // Send the raw data to the I-Buffer
-              inst_raw_data.valid <= 1;
-              inst_raw_data.inst <= inst_cache_request.data;
-
-              // Update status
-              status <= IDLE;
-            end else begin
-              status <= WAIT_CAUGHT;
-            end
-          end
+          dout_ready <= 0;
+          icache_if.valid <= 1;
+          icache_if.addr  <= din.pc;
         end
-        WAIT_CAUGHT: begin
-          if (!inst_raw_data.valid) begin // Same as above
-            inst_raw_data.valid <= 1;
-            inst_raw_data.inst <= inst_cache_request.data;
-            status <= IDLE;
-          end
+        WAIT_READY: begin
+          icache_if.valid <= 0;
+          dout_valid <= 1;
+          dout.inst_raw_data <= icache_if.data;
         end
         default: begin
-          $fatal(0, "gelato_inst_fetch: Invalid status");
+          $fatal(0, "gelato_inst_fetch: Invalid state");
         end
       endcase
     end

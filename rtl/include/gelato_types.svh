@@ -39,6 +39,13 @@ package gelato_types;
     split_table_num_t split_table;
   } pc_info_t;
 
+  typedef struct packed {
+    addr_t pc;
+    warp_num_t warp_num;
+    split_table_num_t split_table;
+    data_t inst_raw_data;
+  } inst_raw_data_t;
+
   typedef logic [`L1_CACHE_ADDR_INDEX] l1_cache_addr_t;
 
   typedef logic [`L1_CACHE_INDEX_INDEX] l1_cache_index_t;
