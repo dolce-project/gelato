@@ -73,7 +73,7 @@ module gelato_inst_fetch (
     if (!rst_n) begin
       dout_valid <= 0;
     end else if (rdy) begin
-      case (state_q)
+      case (state_d)
         IDLE: begin
           dout_valid <= 0;
           dout_ready <= 1;

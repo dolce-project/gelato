@@ -8,6 +8,8 @@
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
+import gelato_types::*;
+
 module gelato_inst_decode (
   input logic clk,
   input logic rst_n,
@@ -17,7 +19,6 @@ module gelato_inst_decode (
   gelato_idecode_split_if.master split_data,  // To split table, get thread mask and update table
   gelato_idecode_ibuffer_if.master inst_decoded_data  // To I-Buffer
 );
-  import gelato_types::*;
 
   typedef enum {
     IDLE,

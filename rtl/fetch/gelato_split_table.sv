@@ -8,19 +8,28 @@
 `include "gelato_macros.svh"
 `include "gelato_types.svh"
 
+import gelato_types::*;
+
 module gelato_split_table (
   input logic clk,
   input logic rst_n,
   input logic rdy,
 
+  // Init signal from SM controller
   gelato_init_warp_if.slave_split_table init,
 
+  // Send the information of PC Table to fetch scheduler
   gelato_pctable_fetchskd_if.master pc_table,
+
+  // Receive updated split data from i-decode
   gelato_idecode_split_if.slave split_data
 );
-  import gelato_types::*;
+  //============================================================================
+  // PC information of each warp
+  //============================================================================
+  gelato_split_table_select_pc_if select_pc_if[`WARP_NUM];
 
-  gelato_split_table_select_pc_if select[`WARP_NUM];
+
   gelato_split_table_update_pc_if update[`WARP_NUM];
   gelato_init_warp_if warp_init[`WARP_NUM];
   warp_num_t warp_num[`WARP_NUM];
@@ -56,7 +65,9 @@ module gelato_split_table (
         if (init_all_warp || warp_num[i] < init_max_warp_num) begin
           warp_init[i].workers = {`THREAD_NUM{1'b1}};
         end else if (warp_num[i] == init_max_warp_num) begin
-          warp_init[i].workers = {{(32 - `THREAD_NUM_WIDTH) {1'b0}}, init_last_thread_num};
+          warp_init[i].workers = {
+            {(32 - `THREAD_NUM_WIDTH) {1'b0}}, init_last_thread_num
+          };
         end else begin
           warp_init[i].workers = 0;
         end
